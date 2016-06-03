@@ -32,7 +32,8 @@ classdef noamp_LEDPulse< symphonyui.core.Protocol
         function prepareRun(obj)
             prepareRun@symphonyui.core.Protocol(obj);
             
-            obj.showFigure('symphonyui.builtin.figures.FrameMonitorFigure', obj.rig.getDevice(obj.frame));
+            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.frame));
+            obj.showFigure('squirrellab.juan.figures.FrameMonitorFigure', obj.rig.getDevice(obj.frame));
             
             obj.rig.getDevice(obj.led).background = symphonyui.core.Measurement(obj.lightMean, 'V');
         end

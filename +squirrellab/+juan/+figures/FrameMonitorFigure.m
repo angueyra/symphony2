@@ -76,10 +76,6 @@ classdef FrameMonitorFigure < symphonyui.core.FigureHandler
                 y = [];
             end
             
-            % overlay stimulus
-            stim = obj.createLedStimulus;
-            obj.stimplot = line(x, stim, 'Parent', obj.axesHandle, 'Color', [.8 .8 .8]);
-            
             %plot response
             if isempty(obj.sweep)
                 obj.sweep = line(x, y, 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
