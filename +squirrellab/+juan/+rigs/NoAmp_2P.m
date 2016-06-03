@@ -25,9 +25,9 @@ classdef NoAmp_2P < symphonyui.core.descriptions.RigDescription
 %             obj.addDevice(amp2);
             
 
-            frames = UnitConvertingDevice('Frames', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_IN.0'));
-            daq.getStream('DIGITAL_IN.0').setBitPosition(frames, 0);
-            obj.addDevice(frames);
+            frame = UnitConvertingDevice('FrameMonitor', 'V');
+            frame.bindStream(daq.getStream('DIGITAL_IN.0'));
+            obj.addDevice(frame);
 
             mx405LED = UnitConvertingDevice('mx405LED', 'V').bindStream(daq.getStream('ANALOG_OUT.2'));
             mx405LED.addConfigurationSetting('ndfs', {}, ...

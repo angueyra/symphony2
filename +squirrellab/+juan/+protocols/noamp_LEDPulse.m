@@ -22,7 +22,7 @@ classdef noamp_LEDPulse< symphonyui.core.Protocol
             didSetRig@symphonyui.core.Protocol(obj);
             
             [obj.led, obj.ledType] = obj.createDeviceNamesProperty('LED');
-            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('Frame');
+            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
         end
         
         function p = getPreview(obj, panel)
@@ -32,11 +32,7 @@ classdef noamp_LEDPulse< symphonyui.core.Protocol
         function prepareRun(obj)
             prepareRun@symphonyui.core.Protocol(obj);
             
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.frame));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.frame));
-            obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.frame), {@mean, @var}, ...
-                'baselineRegion', [0 obj.preTime], ...
-                'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
+            obj.showFigure('symphonyui.builtin.figures.FrameMonitorFigure', obj.rig.getDevice(obj.frame));
             
             obj.rig.getDevice(obj.led).background = symphonyui.core.Measurement(obj.lightMean, 'V');
         end
