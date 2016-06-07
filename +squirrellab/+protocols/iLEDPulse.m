@@ -1,4 +1,7 @@
-classdef noamp_LEDPulse< symphonyui.core.Protocol
+classdef iLEDPulse< squirrellab.protocols.SquirrelLabProtocol
+    % LED pulse while doing 2P imaging and not using electrophysiology
+    % amplififer
+    % Will still collect frame timing and temperature
     properties
         led                             % Output LED
         preTime = 10                    % Pulse leading duration (ms)

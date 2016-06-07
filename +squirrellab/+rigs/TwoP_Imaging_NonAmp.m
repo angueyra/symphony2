@@ -1,8 +1,8 @@
-classdef NoAmp_2P < symphonyui.core.descriptions.RigDescription
+classdef TwoP_Imaging_NonAmp < symphonyui.core.descriptions.RigDescription
     
     methods
         
-        function obj = NoAmp_2P()
+        function obj = TwoP_Imaging_NonAmp()
             import symphonyui.builtin.daqs.*;
             import symphonyui.builtin.devices.*;
             import symphonyui.core.*;
@@ -43,7 +43,7 @@ classdef NoAmp_2P < symphonyui.core.descriptions.RigDescription
                 'type', PropertyType('char', 'row', {'', 'low', 'medium', 'high'}));
             obj.addDevice(mx590LED);
             
-            T5Controller = UnitConvertingDevice('T5Controller', 'V').bindStream(daq.getStream('ANALOG_IN.7'));
+            T5Controller = UnitConvertingDevice('T5Controller', 'V','manufacturer','Bioptechs','model','T5').bindStream(daq.getStream('ANALOG_IN.7'));
             obj.addDevice(T5Controller);
             
             trigger = UnitConvertingDevice('Trigger', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_OUT.0'));
