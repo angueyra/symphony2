@@ -1,8 +1,8 @@
-classdef Cell < squirrellab.sources.Cell
+classdef MouseCell < squirrellab.sources.Cell
     
     methods
         
-        function obj = Cell()
+        function obj = MouseCell()
             import symphonyui.core.*;
             
             obj.addProperty('type', 'unknown', ...
@@ -16,7 +16,7 @@ classdef Cell < squirrellab.sources.Cell
                     {'S cone', 'M cone', 'rod'}})), ...
                 'description', 'The confirmed type of the recorded cell');
             
-            obj.addAllowableParentType('squirrellab.sources.mouse.Preparation');
+            obj.addAllowableParentType('squirrellab.sources.mouse.MousePrep');
         end
         
     end

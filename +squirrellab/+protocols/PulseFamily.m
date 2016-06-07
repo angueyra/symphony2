@@ -19,7 +19,7 @@ classdef PulseFamily < squirrellab.protocols.SquirrelLabProtocol
     methods
         
         function didSetRig(obj)
-            didSetRig@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
@@ -35,7 +35,7 @@ classdef PulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)           
-            prepareRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
@@ -62,7 +62,7 @@ classdef PulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
             pulseNum = mod(obj.numEpochsPrepared - 1, obj.pulsesInFamily) + 1;
             [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
@@ -73,7 +73,7 @@ classdef PulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

@@ -32,7 +32,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function didSetRig(obj)
-            didSetRig@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
@@ -46,7 +46,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             if isempty(obj.modeFigure) || ~isvalid(obj.modeFigure)
                 obj.modeFigure = obj.showFigure('symphonyui.builtin.figures.CustomFigure', @null);
@@ -98,7 +98,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
             devices = obj.rig.getInputDevices();
             for i = 1:numel(devices)
@@ -127,7 +127,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function completeRun(obj)
-            completeRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            completeRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             if obj.alternateMode
                 if strcmpi(obj.mode, 'seal')

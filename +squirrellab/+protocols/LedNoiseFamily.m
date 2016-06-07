@@ -34,7 +34,7 @@ classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function didSetRig(obj)
-            didSetRig@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             [obj.led, obj.ledType] = obj.createDeviceNamesProperty('LED');
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
@@ -56,7 +56,7 @@ classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
@@ -71,7 +71,7 @@ classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
             sdNum = floor((double(pulseNum) - 1) / double(obj.repeatsPerStdv));
             stdv = obj.stdvMultiplier^sdNum * obj.startStdv;
             
-            gen = edu.washington.riekelab.stimuli.GaussianNoiseGenerator();
+            gen = squirrellab.stimuli.GaussianNoiseGenerator();
             
             gen.preTime = obj.preTime;
             gen.stimTime = obj.stimTime;
@@ -90,7 +90,7 @@ classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
             persistent seed;
             if ~obj.useRandomSeed
@@ -109,7 +109,7 @@ classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.led);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

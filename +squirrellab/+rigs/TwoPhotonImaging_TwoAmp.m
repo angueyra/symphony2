@@ -1,8 +1,8 @@
-classdef TwoP_Imaging_OneAmp < symphonyui.core.descriptions.RigDescription
+classdef TwoPhotonImaging_TwoAmp < symphonyui.core.descriptions.RigDescription
     
     methods
         
-        function obj = TwoP_Imaging_OneAmp()
+        function obj = TwoPhotonImaging_TwoAmp()
             import symphonyui.builtin.daqs.*;
             import symphonyui.builtin.devices.*;
             import symphonyui.core.*;
@@ -17,13 +17,12 @@ classdef TwoP_Imaging_OneAmp < symphonyui.core.descriptions.RigDescription
              amp1.bindStream(daq.getStream('ANALOG_IN.3'), AxopatchDevice.MODE_TELEGRAPH_STREAM_NAME);
              obj.addDevice(amp1);
             
-%             amp2 = AxopatchDevice('Amp2').bindStream(daq.getStream('ANALOG_OUT.1'));
-%             amp2.bindStream(daq.getStream('ANALOG_IN.4'), AxopatchDevice.SCALED_OUTPUT_STREAM_NAME);
-%             amp2.bindStream(daq.getStream('ANALOG_IN.5'), AxopatchDevice.GAIN_TELEGRAPH_STREAM_NAME);
-%             amp2.bindStream(daq.getStream('ANALOG_IN.6'), AxopatchDevice.MODE_TELEGRAPH_STREAM_NAME);
-%             obj.addDevice(amp2);
+             amp2 = AxopatchDevice('Amp2').bindStream(daq.getStream('ANALOG_OUT.1'));
+             amp2.bindStream(daq.getStream('ANALOG_IN.4'), AxopatchDevice.SCALED_OUTPUT_STREAM_NAME);
+             amp2.bindStream(daq.getStream('ANALOG_IN.5'), AxopatchDevice.GAIN_TELEGRAPH_STREAM_NAME);
+             amp2.bindStream(daq.getStream('ANALOG_IN.6'), AxopatchDevice.MODE_TELEGRAPH_STREAM_NAME);
+             obj.addDevice(amp2);
             
-
             frame = UnitConvertingDevice('FrameMonitor', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_IN.0'));
             daq.getStream('DIGITAL_IN.0').setBitPosition(frame, 0);
             obj.addDevice(frame);

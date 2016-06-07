@@ -19,14 +19,14 @@ classdef (Abstract) SquirrelLabProtocol < symphonyui.core.Protocol
                 response = epoch.getResponse(T5Controller{1});
                 [quantities, units] = response.getData();
                 if ~strcmp(units, 'V')
-                    error('T5 Temperature Controller must be in volts');
+                    error('Temperature Controller must be in volts');
                 end
                 
-                % Temperature readout from Bioptechs Delta T4/T5 Culture dish controller 100 mV/degree C.
+                % Temperature readout from Warner TC-324B controller 100 mV/degree C.
                 temperature = mean(quantities) * 1000 * (1/100);
                 temperature = round(temperature * 10) / 10;
-                epoch.addParameter('dishTemperature', temperature);
-                fprintf('Temp = %2.2g C\n', temperature)
+                epoch.addParameter('bathTemperature', temperature);
+                
                 epoch.removeResponse(T5Controller{1});
             end
         end

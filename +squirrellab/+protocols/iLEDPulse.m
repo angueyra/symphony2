@@ -36,7 +36,6 @@ classdef iLEDPulse< squirrellab.protocols.SquirrelLabProtocol
             prepareRun@symphonyui.core.Protocol(obj);
             
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.frame));
-            obj.showFigure('squirrellab.juan.figures.FrameMonitorFigure', obj.rig.getDevice(obj.frame));
             
             obj.rig.getDevice(obj.led).background = symphonyui.core.Measurement(obj.lightMean, 'V');
         end
