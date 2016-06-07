@@ -43,6 +43,9 @@ classdef NoAmp_2P < symphonyui.core.descriptions.RigDescription
                 'type', PropertyType('char', 'row', {'', 'low', 'medium', 'high'}));
             obj.addDevice(mx590LED);
             
+            T5Controller = UnitConvertingDevice('T5Controller', 'V').bindStream(daq.getStream('ANALOG_IN.7'));
+            obj.addDevice(T5Controller);
+            
             trigger = UnitConvertingDevice('Trigger', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_OUT.0'));
             daq.getStream('DIGITAL_OUT.0').setBitPosition(trigger, 0);
             obj.addDevice(trigger);
