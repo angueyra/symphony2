@@ -54,8 +54,28 @@ classdef iLEDPulse< squirrellab.protocols.SquirrelLabProtocol
             stim = gen.generate();
         end
         
+        function stim = createTriggerStimulus(obj)
+            gen = symphonyui.builtin.stimuli.PulseGenerator();
+            
+            gen.preTime = 0;
+            gen.stimTime = 1;
+            gen.tailTime = obj.preTime + obj.stimTime + obj.tailTime - 1;
+            gen.amplitude = 1;
+            gen.mean = 0;
+            gen.sampleRate = obj.sampleRate;
+            gen.units = symphonyui.core.Measurement.UNITLESS;
+            
+            stim = gen.generate();
+        end
+        
         function prepareEpoch(obj, epoch)
-            prepareEpoch@symphonyui.core.Protocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
+            
+            % generate trigger
+            trigger = obj.rig.getDevices('Trigger');
+            if ~isempty(trigger)            
+                epoch.addStimulus(trigger{1}, obj.createTriggerStimulus());
+            end
             
             epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
             epoch.addResponse(obj.rig.getDevice(obj.frame));

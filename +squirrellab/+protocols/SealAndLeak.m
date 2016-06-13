@@ -109,7 +109,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
             
             epoch.addStimulus(obj.rig.getDevice(obj.amp), obj.createAmpStimulus());
             
-            triggers = obj.rig.getDevices('Oscilloscope Trigger');
+            triggers = obj.rig.getDevices('Trigger');
             if ~isempty(triggers)            
                 epoch.addStimulus(triggers{1}, obj.createOscilloscopeTriggerStimulus());
             end

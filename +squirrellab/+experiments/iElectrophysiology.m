@@ -1,8 +1,9 @@
-classdef Electrophysiology < symphonyui.core.persistent.descriptions.ExperimentDescription
-    
+classdef iElectrophysiology < symphonyui.core.persistent.descriptions.ExperimentDescription
+    % Two Photon imaging combined with electrophsyiology tools and
+    % management.
     methods
         
-        function obj = Electrophysiology()
+        function obj = iElectrophysiology()
             import symphonyui.core.*;
             
             obj.addProperty('experimenter', 'Juan', ...
