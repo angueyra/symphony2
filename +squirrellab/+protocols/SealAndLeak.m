@@ -4,9 +4,9 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
         amp                             % Output amplifier
         mode = 'seal'                   % Current mode of protocol
         alternateMode = true            % Alternate from seal to leak to seal etc., on each successive run
-        preTime = 15                    % Pulse leading duration (ms)
-        stimTime = 30                   % Pulse duration (ms)
-        tailTime = 15                   % Pulse trailing duration (ms)
+        preTime = 10                    % Pulse leading duration (ms)
+        stimTime = 25                   % Pulse duration (ms)
+        tailTime = 10                   % Pulse trailing duration (ms)
         pulseAmplitude = 5              % Pulse amplitude (mV or pA)
         leakAmpHoldSignal = -60         % Amplifier hold signal to use while in leak mode
     end
@@ -83,7 +83,7 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
             stim = gen.generate();
         end
         
-        function stim = createOscilloscopeTriggerStimulus(obj)
+        function stim = createTriggerStimulus(obj)
             gen = symphonyui.builtin.stimuli.RepeatingPulseGenerator();
             
             gen.preTime = 0;
@@ -109,9 +109,9 @@ classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
             
             epoch.addStimulus(obj.rig.getDevice(obj.amp), obj.createAmpStimulus());
             
-            triggers = obj.rig.getDevices('Trigger');
-            if ~isempty(triggers)            
-                epoch.addStimulus(triggers{1}, obj.createOscilloscopeTriggerStimulus());
+            trigger = obj.rig.getDevices('Trigger');
+            if ~isempty(trigger)            
+                epoch.addStimulus(trigger{1}, obj.createTriggerStimulus());
             end
             
             device = obj.rig.getDevice(obj.amp);

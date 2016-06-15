@@ -14,9 +14,10 @@ classdef (Abstract) SquirrelLabProtocol < symphonyui.core.Protocol
         
         function completeEpoch(obj, epoch)
             completeEpoch@symphonyui.core.Protocol(obj, epoch);
-            % remove trigger stimulus
-            trigger=obj.rig.getDevices('Trigger');
-            epoch.removeStimulus(trigger);
+            keyboard
+%             % remove trigger stimulus
+%             trigger=obj.rig.getDevices('Trigger');
+%             epoch.removeStimulus(trigger);
             
             %condense temperature measurement into single value
             T5Controller = obj.rig.getDevices('T5Controller');
