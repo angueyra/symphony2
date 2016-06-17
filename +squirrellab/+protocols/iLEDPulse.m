@@ -4,10 +4,10 @@ classdef iLEDPulse< squirrellab.protocols.SquirrelLabProtocol
     % Will still collect frame timing and temperature
     properties
         led                             % Output LED
-        preTime = 10                    % Pulse leading duration (ms)
-        stimTime = 100                  % Pulse duration (ms)
-        tailTime = 400                  % Pulse trailing duration (ms)
-        lightAmplitude = 1              % Pulse amplitude (V)
+        preTime = 1000                    % Pulse leading duration (ms)
+        stimTime = 1000                  % Pulse duration (ms)
+        tailTime = 3000                  % Pulse trailing duration (ms)
+        lightAmplitude = 5              % Pulse amplitude (V)
         lightMean = 0                   % Pulse and LED background mean (V)
         frame                           % imaging frame monitor
         numberOfAverages = uint16(1)    % Number of epochs

@@ -1,8 +1,8 @@
-classdef iTwoPhoton_OneAmp < symphonyui.core.descriptions.RigDescription
+classdef RigA_OneAmp < symphonyui.core.descriptions.RigDescription
     
     methods
         
-        function obj = iTwoPhoton_OneAmp()
+        function obj = RigA_OneAmp()
             import symphonyui.builtin.daqs.*;
             import symphonyui.builtin.devices.*;
             import symphonyui.core.*;
@@ -17,18 +17,14 @@ classdef iTwoPhoton_OneAmp < symphonyui.core.descriptions.RigDescription
              amp1.bindStream(daq.getStream('ANALOG_IN.3'), AxopatchDevice.MODE_TELEGRAPH_STREAM_NAME);
              obj.addDevice(amp1);        
 
-            frame = UnitConvertingDevice('FrameMonitor', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_IN.0'));
-            daq.getStream('DIGITAL_IN.0').setBitPosition(frame, 0);
-            obj.addDevice(frame);
-
-            mx405LED = UnitConvertingDevice('mx405LED', 'V','manufacturer','Mightex').bindStream(daq.getStream('ANALOG_OUT.2'));
+            mx405LED = UnitConvertingDevice('mx405LED', 'V').bindStream(daq.getStream('ANALOG_OUT.2'));
             mx405LED.addConfigurationSetting('ndfs', {}, ...
                 'type', PropertyType('cellstr', 'row', {'0.3', '0.6', '1.2', '3.0', '4.0'}));
             mx405LED.addConfigurationSetting('gain', '', ...
                 'type', PropertyType('char', 'row', {'', 'low', 'medium', 'high'}));
             obj.addDevice(mx405LED);
             
-            mx590LED = UnitConvertingDevice('mx590LED', 'V','manufacturer','Mightex').bindStream(daq.getStream('ANALOG_OUT.3'));
+            mx590LED = UnitConvertingDevice('mx590LED', 'V').bindStream(daq.getStream('ANALOG_OUT.3'));
             mx590LED.addConfigurationSetting('ndfs', {}, ...
                 'type', PropertyType('cellstr', 'row', {'0.3', '0.6', '1.2', '3.0', '4.0'}));
             mx590LED.addConfigurationSetting('gain', '', ...

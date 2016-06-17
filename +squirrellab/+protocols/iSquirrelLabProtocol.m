@@ -1,8 +1,11 @@
-classdef (Abstract) SquirrelLabProtocol < symphonyui.core.Protocol
-    
+classdef (Abstract) iSquirrelLabProtocol < symphonyui.core.Protocol
+    % Protocol for integration of two-photon imaging with Symphony2
+    % Will create frame monitor, trigger to start imaging and record temperature 
     methods
+        
         function prepareEpoch(obj, epoch)
             prepareEpoch@symphonyui.core.Protocol(obj, epoch);
+
             % add remperature controller monitor
             T5Controller = obj.rig.getDevices('T5Controller');
             if ~isempty(T5Controller)
@@ -12,6 +15,10 @@ classdef (Abstract) SquirrelLabProtocol < symphonyui.core.Protocol
         
         function completeEpoch(obj, epoch)
             completeEpoch@symphonyui.core.Protocol(obj, epoch);
+            keyboard
+%             % remove trigger stimulus
+%             trigger=obj.rig.getDevices('Trigger');
+%             epoch.removeStimulus(trigger);
             
             %condense temperature measurement into single value
             T5Controller = obj.rig.getDevices('T5Controller');

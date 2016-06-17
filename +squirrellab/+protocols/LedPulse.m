@@ -8,6 +8,7 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
         lightAmplitude = 1              % Pulse amplitude (V)
         lightMean = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
+        frame                           % Frame monitor
         numberOfAverages = uint16(5)    % Number of epochs
         interpulseInterval = 0          % Duration between pulses (s)
     end
@@ -15,6 +16,7 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
     properties (Hidden)
         ledType
         ampType
+        frameType
     end
     
     methods
@@ -24,6 +26,7 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
             
             [obj.led, obj.ledType] = obj.createDeviceNamesProperty('LED');
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
+            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
         end
         
         function p = getPreview(obj, panel)

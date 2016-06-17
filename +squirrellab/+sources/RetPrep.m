@@ -34,7 +34,7 @@ classdef (Abstract) RetPrep < symphonyui.core.persistent.descriptions.SourceDesc
             obj.addProperty('region', {}, ...
     			'type', PropertyType('cellstr', 'row', {'superior', 'inferior', 'nasal', 'temporal'}));
             obj.addProperty('virus', 'none', ...
-                'type', PropertyType('char', 'row', viralMap), ...
+                'type', PropertyType('char', 'row', obj.createViralMap()), ...
                 'description', 'virus serotype');
             obj.addProperty('virus delivery', '', ...
     			'type', PropertyType('char', 'row', {'subretinal', 'intravitreal', ''}),...
@@ -48,25 +48,20 @@ classdef (Abstract) RetPrep < symphonyui.core.persistent.descriptions.SourceDesc
     end
     
     methods (Static=true)
-        function viralMap = createNestedMap ()
+        
+        function viralMap = createViralMap()
             capsids = {'AAV1','AAV2','AAV2sc','AAV2/1','AAV8','AAV8','AAV8Y733R','mAAV'};
-            promoters={'CMV','RK','Syn'};
-            proteins={'eGFP','iGluSnfr','Gcamp6m','Gcamp6s','Gcamp6s-Ruby2'};
+            proteins={'CMV-eGFP','RK-eGFP','Syn-iGluSnfr','Syn-Gcamp6m','Syn-Gcamp6s','Syn-Gcamp6sRuby2'};
             
-            nested_proteins=cell(1,size(promoters,2));
-            for i=1:size(promoters,2)
+            nested_proteins=cell(1,size(capsids,2));
+            for i=1:size(capsids,2)
                 nested_proteins{i}=proteins;
             end
-            mapProm=containers.Map(promoters,nested_proteins);
-            
-            nested_promoters=cell(1,size(capsids,2));
-            for i=1:size(capsids,2)
-                nested_promoters{i}=mapProm;
-            end
-            
-            viralMap = containers.Map(capsids,nested_promoters);
+            viralMap=containers.Map(capsids,nested_proteins);
+
             viralMap('none')='';
         end
+        
     end
     
 end

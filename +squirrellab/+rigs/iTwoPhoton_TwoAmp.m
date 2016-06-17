@@ -27,14 +27,14 @@ classdef iTwoPhoton_TwoAmp < symphonyui.core.descriptions.RigDescription
             daq.getStream('DIGITAL_IN.0').setBitPosition(frame, 0);
             obj.addDevice(frame);
 
-            mx405LED = UnitConvertingDevice('mx405LED', 'V').bindStream(daq.getStream('ANALOG_OUT.2'));
+            mx405LED = UnitConvertingDevice('mx405LED', 'V','manufacturer','Mightex').bindStream(daq.getStream('ANALOG_OUT.2'));
             mx405LED.addConfigurationSetting('ndfs', {}, ...
                 'type', PropertyType('cellstr', 'row', {'0.3', '0.6', '1.2', '3.0', '4.0'}));
             mx405LED.addConfigurationSetting('gain', '', ...
                 'type', PropertyType('char', 'row', {'', 'low', 'medium', 'high'}));
             obj.addDevice(mx405LED);
             
-            mx590LED = UnitConvertingDevice('mx590LED', 'V').bindStream(daq.getStream('ANALOG_OUT.3'));
+            mx590LED = UnitConvertingDevice('mx590LED', 'V','manufacturer','Mightex').bindStream(daq.getStream('ANALOG_OUT.3'));
             mx590LED.addConfigurationSetting('ndfs', {}, ...
                 'type', PropertyType('cellstr', 'row', {'0.3', '0.6', '1.2', '3.0', '4.0'}));
             mx590LED.addConfigurationSetting('gain', '', ...
