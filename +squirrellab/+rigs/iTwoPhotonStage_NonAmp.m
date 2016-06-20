@@ -1,21 +1,14 @@
-classdef iTwoPhoton_OneAmp < symphonyui.core.descriptions.RigDescription
+classdef iTwoPhotonStage_NonAmp < symphonyui.core.descriptions.RigDescription
     
     methods
         
-        function obj = iTwoPhoton_OneAmp()
+        function obj = iTwoPhotonStage_NonAmp()
             import symphonyui.builtin.daqs.*;
             import symphonyui.builtin.devices.*;
             import symphonyui.core.*;
             
             daq = HekaDaqController();
             obj.daqController = daq;
-            
-            amp1 = AxopatchDevice('Amp1').bindStream(daq.getStream('ANALOG_OUT.0'));
-            amp1.bindStream(daq.getStream('ANALOG_IN.0'), AxopatchDevice.SCALED_OUTPUT_STREAM_NAME);
-            amp1.bindStream(daq.getStream('ANALOG_IN.1'), AxopatchDevice.GAIN_TELEGRAPH_STREAM_NAME);
-            %missing frequency input here (is that the low pass filter value?)
-            amp1.bindStream(daq.getStream('ANALOG_IN.3'), AxopatchDevice.MODE_TELEGRAPH_STREAM_NAME);
-            obj.addDevice(amp1);
 
             frame = UnitConvertingDevice('FrameMonitor', symphonyui.core.Measurement.UNITLESS).bindStream(daq.getStream('DIGITAL_IN.0'));
             daq.getStream('DIGITAL_IN.0').setBitPosition(frame, 0);
@@ -42,7 +35,8 @@ classdef iTwoPhoton_OneAmp < symphonyui.core.descriptions.RigDescription
             daq.getStream('DIGITAL_OUT.1').setBitPosition(trigger, 0);
             obj.addDevice(trigger);
             
-            
+            stage = io.github.stage_vss.devices.StageDevice('localhost');
+            obj.addDevice(stage);
         end
         
     end
