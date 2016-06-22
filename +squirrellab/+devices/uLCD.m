@@ -8,7 +8,7 @@ classdef uLCD < handle
         
         function obj = uLCD(port)
             if nargin < 1
-                port = 'COM3';
+                port = 'COM9';
             end
 
             obj.serialPort = serial(port,'BaudRate',875000);%default=9600%max=875000 
@@ -21,27 +21,39 @@ classdef uLCD < handle
         
         function connect(obj)
             fopen(obj.serialPort);
-            
-            % Test connection.
-%             fwrite(obj.serialPort, 'T');
-%             
-%             [~, ~, msg] = fread(obj.serialPort, 3);
-%             if ~strcmp(msg, '')
-%                 obj.disconnect();
-%                 error(['Unable to connect: ' msg]);
-%             end
+            %obj.testconnection;
+            % Test connection by clearing screen and receiveing
+            % acknowledgement
+            fwrite(obj.serialPort,[255,130]);
+            ack=fread(obj.serialPort,1);
+            if ack==6
+                fprintf('Connected to uLCD!\n')
+            else
+                obj.disconnect();
+                error('Unable to connect');
+            end
         end
         
         function disconnect(obj)
             fclose(obj.serialPort);
         end
         
+        function testconnection(obj)
+            % Test connection by clearing screen and receiveing
+            % acknowledgement
+            fwrite(obj.serialPort,[255,130]);
+            ack=fread(obj.serialPort,1);
+            if ack==6
+                fprintf('Connection is active\n')
+            else
+                fprintf('Unable to receive ACK\n')
+            end
+        end
+        
         function clear(obj)
             % clear screen
-            fwrite(obj.serialPort,255);%fwrite(obj.serialPort,hex2dec('FF'));
-            fwrite(obj.serialPort,130);%fwrite(obj.serialPort,hex2dec('82'));
-            % Does this work?
-            % fwrite(idLCD,[255,130]);
+            fwrite(obj.serialPort,[255,130]);
+            %msg=fread(obj.serialPort,1);
         end
         
         function spot(obj,centerX,centerY,radius,hexcolor1,hexcolor2)
@@ -53,17 +65,16 @@ classdef uLCD < handle
             end
             if isempty(hexcolor2)
                 hexcolor2=255;
-            end
-            % Clears screen and creates white ring
-            obj.clear;        
+            end        
             centerX(centerX>220)=220/2;
             centerY(centerY>220)=220/2;
             % Outer circle
-            fwrite(idLCD,255);fwrite(idLCD,119);%fwrite(idLCD,hex2dec('FF'));fwrite(idLCD,hex2dec('77'));
-            fwrite(idLCD,00);fwrite(idLCD,centerX);
-            fwrite(idLCD,00);fwrite(idLCD,centerY);
-            fwrite(idLCD,00);fwrite(idLCD,radius);
-            fwrite(idLCD,hexcolor1);fwrite(idLCD,hexcolor2);
+            fwrite(obj.serialPort,[255,119]);
+            fwrite(obj.serialPort,[00,centerX]);
+            fwrite(obj.serialPort,[00,centerY]);
+            fwrite(obj.serialPort,[00,radius]);
+            fwrite(obj.serialPort,[hexcolor1,hexcolor2]);
+            %msg=fread(obj.serialPort,1);
         end
         
         function spot_white(obj,centerX,centerY,radius)
@@ -80,23 +91,19 @@ classdef uLCD < handle
         
         function ring(obj,centerX,centerY,rInner,rOuter)
             % Outer circle
-            spot_white(obj.serialPort,centerX,centerY,rOuter);
+            spot_white(obj,centerX,centerY,rOuter);
             %Inner circle
-            spot_black(obj.serialPort,centerX,centerY,rInner); 
+            spot_black(obj,centerX,centerY,rInner); 
         end
         
         function white2black(obj)
             % makes all white pixels black
-            fwrite(obj.serialPort,255);fwrite(obj.serialPort,105);%fwrite(idLCD,hex2dec('FF'));fwrite(idLCD,hex2dec('69'));
-            fwrite(obj.serialPort,255);fwrite(obj.serialPort,255);
-            fwrite(obj.serialPort,0);fwrite(obj.serialPort,0);
+            fwrite(obj.serialPort,[255,105,255,255,000,000]);
         end
         
         function black2white(obj)
              % makes all black pixels white
-            fwrite(obj.serialPort,255);fwrite(obj.serialPort,105);%fwrite(idLCD,hex2dec('FF'));fwrite(idLCD,hex2dec('69'));
-            fwrite(obj.serialPort,0);fwrite(obj.serialPort,0);
-            fwrite(obj.serialPort,255);fwrite(obj.serialPort,255);
+            fwrite(obj.serialPort,[255,105,000,000,255,255]);
         end
         
         function moveRing(obj,stX,stY,fX,fY,rInner,rOuter,frames)
@@ -107,10 +114,10 @@ classdef uLCD < handle
             
             for f=0:frames
                 if f>0
-                    obj.spot_black(obj.serialPort,stX+(deltaX*(f-1)),stY+(deltaY*(f-1)),rOuter);
+%                     obj.spot_black(stX+(deltaX*(f-1)),stY+(deltaY*(f-1)),rOuter);
                 end
-                obj.spot_white(obj.serialPort,stX+(deltaX*f),stY+(deltaY*f),rOuter);
-                obj.spot_black(obj.serialPort,stX+(deltaX*f),stY+(deltaY*f),rInner);
+                obj.spot_white(stX+(deltaX*f),stY+(deltaY*f),rOuter);
+                obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rInner);
             end
         end
         
