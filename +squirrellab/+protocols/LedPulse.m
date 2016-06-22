@@ -36,9 +36,9 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
         function prepareRun(obj)
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
+            obj.showFigure('squirrellab.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
             
