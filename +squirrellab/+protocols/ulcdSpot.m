@@ -1,4 +1,4 @@
-classdef ulcdSpot < edu.washington.riekelab.protocols.RiekeLabStageProtocol
+classdef ulcdSpot < squirrellab.protocols.SquirrelLabProtocolStage
     
     properties
         amp                             % Output amplifier
@@ -20,7 +20,7 @@ classdef ulcdSpot < edu.washington.riekelab.protocols.RiekeLabStageProtocol
     methods
         
         function didSetRig(obj)
-            didSetRig@edu.washington.riekelab.protocols.RiekeLabStageProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabProtocolStage(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end

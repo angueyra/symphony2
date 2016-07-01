@@ -21,17 +21,7 @@ classdef uLCD < handle
         
         function connect(obj)
             fopen(obj.serialPort);
-            %obj.testconnection;
-            % Test connection by clearing screen and receiveing
-            % acknowledgement
-            fwrite(obj.serialPort,[255,130]);
-            ack=fread(obj.serialPort,1);
-            if ack==6
-                fprintf('Connected to uLCD!\n')
-            else
-                obj.disconnect();
-                error('Unable to connect');
-            end
+            obj.testconnection;
         end
         
         function disconnect(obj)
@@ -39,8 +29,7 @@ classdef uLCD < handle
         end
         
         function testconnection(obj)
-            % Test connection by clearing screen and receiveing
-            % acknowledgement
+            % Test connection by clearing screen and receiving acknowledgement
             fwrite(obj.serialPort,[255,130]);
             ack=fread(obj.serialPort,1);
             if ack==6

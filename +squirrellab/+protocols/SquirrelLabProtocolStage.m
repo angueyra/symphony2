@@ -1,4 +1,4 @@
-classdef (Abstract) StageProtocol < symphonyui.core.Protocol
+classdef (Abstract) SquirrelLabProtocolStage < squirrellab.protocols.SquirrelLabProtocol
     
     methods (Abstract)
         p = createPresentation(obj);
@@ -6,8 +6,19 @@ classdef (Abstract) StageProtocol < symphonyui.core.Protocol
     
     methods
         
+        function prepareEpoch(obj, epoch)
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
+%             epoch.shouldWaitForTrigger = true; %external trigger start Symphony
+            
+%             % frame monitor from spatial stimulus for timing issues
+%             frameMonitor = obj.rig.getDevices('Frame Monitor');
+%             if ~isempty(frameMonitor)
+%                 epoch.addResponse(frameMonitor{1});
+%             end
+        end
+        
         function controllerDidStartHardware(obj)
-            controllerDidStartHardware@symphonyui.core.Protocol(obj);
+            controllerDidStartHardware@squirrellab.protocols.SquirrelLabProtocol(obj);
             obj.rig.getDevice('Stage').play(obj.createPresentation());
         end
         
@@ -20,12 +31,12 @@ classdef (Abstract) StageProtocol < symphonyui.core.Protocol
         end
         
         function completeRun(obj)
-            completeRun@symphonyui.core.Protocol(obj);
+            completeRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
             obj.rig.getDevice('Stage').clearMemory();
         end
         
         function [tf, msg] = isValid(obj)
-            [tf, msg] = isValid@symphonyui.core.Protocol(obj);
+            [tf, msg] = isValid@squirrellab.protocols.SquirrelLabProtocol(obj);
             if tf
                 tf = ~isempty(obj.rig.getDevices('Stage'));
                 msg = 'No stage';
