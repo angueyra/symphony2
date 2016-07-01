@@ -1,115 +1,107 @@
-classdef uLCDDevice < handle
+classdef uLCDDevice < symphonyui.core.Device
     
-    properties %(Access = private, Transient)
-        serialPort
+    properties (Access = private, Transient)
+        stageClient
+        uLCD
     end
     
     methods
         
-        function obj = uLCDDevice(port)
-            if nargin < 1
-                port = 'COM9';
+        function obj = uLCDDevice(varargin)
+            ip = inputParser();
+            ip.addParameter('host', 'localhost', @ischar);
+            ip.addParameter('port', 5678, @isnumeric);
+            ip.addParameter('comPort', 'COM9', @ischar);
+            ip.parse(varargin{:});
+            
+            cobj = Symphony.Core.UnitConvertingExternalDevice(['uLCD Stage@' ip.Results.host], '4D Systems', Symphony.Core.Measurement(0, symphonyui.core.Measurement.UNITLESS));
+            obj@symphonyui.core.Device(cobj);
+            obj.cobj.MeasurementConversionTarget = symphonyui.core.Measurement.UNITLESS;
+            
+            obj.stageClient = stage.core.network.StageClient();
+            obj.stageClient.connect(ip.Results.host, ip.Results.port);
+            
+            obj.uLCD = squirrellab.devices.uLCDObj(ip.Results.comPort);
+            obj.uLCD.connect();
+            fprintf('Connected to uLCD\n')
+            trueCanvasSize = obj.stageClient.getCanvasSize();
+            canvasSize = [trueCanvasSize(1) * 0.5, trueCanvasSize(2)];
+            
+            obj.addConfigurationSetting('canvasSize', canvasSize, 'isReadOnly', true);
+            obj.addConfigurationSetting('trueCanvasSize', trueCanvasSize, 'isReadOnly', true);
+            obj.addConfigurationSetting('monitorRefreshRate', obj.stageClient.getMonitorRefreshRate(), 'isReadOnly', true);
+            obj.addConfigurationSetting('prerender', false, 'isReadOnly', true);
+            fprintf('Added configuration settings\n')
+        end
+        
+        function close(obj)
+            if ~isempty(obj.stageClient)
+                obj.stageClient.disconnect();
             end
-
-            obj.serialPort = serial(port,'BaudRate',875000);%default=9600%max=875000 
+            if ~isempty(obj.uLCD)
+                obj.uLCD.disconnect();
+            end
         end
         
-        function delete(obj)
-            obj.disconnect();
-            delete(obj.serialPort);
+        function s = getCanvasSize(obj)
+            s = obj.getConfigurationSetting('canvasSize');
         end
         
-        function connect(obj)
-            fopen(obj.serialPort);
-            obj.testconnection;
+        function s = getTrueCanvasSize(obj)
+            s = obj.getConfigurationSetting('trueCanvasSize');
         end
         
-        function disconnect(obj)
-            fclose(obj.serialPort);
+        function r = getMonitorRefreshRate(obj)
+            r = obj.getConfigurationSetting('monitorRefreshRate');
         end
         
-        function testconnection(obj)
-            % Test connection by clearing screen and receiving acknowledgement
-            fwrite(obj.serialPort,[255,130]);
-            ack=fread(obj.serialPort,1);
-            if ack==6
-                fprintf('Connection is active\n')
+        function setPrerender(obj, tf)
+            obj.setReadOnlyConfigurationSetting('prerender', logical(tf));
+        end
+        
+        function tf = getPrerender(obj)
+            tf = obj.getConfigurationSetting('prerender');
+        end
+        
+        function play(obj, presentation)
+            canvasSize = obj.getCanvasSize();
+            
+            background = stage.builtin.stimuli.Rectangle();
+            background.size = canvasSize;
+            background.position = canvasSize/2;
+            background.color = presentation.backgroundColor;
+            presentation.setBackgroundColor(0);
+            presentation.insertStimulus(1, background);
+            
+            tracker = stage.builtin.stimuli.FrameTracker();
+            tracker.size = canvasSize;
+            tracker.position = [canvasSize(1) + (canvasSize(1)/2), canvasSize(2)/2];
+            presentation.addStimulus(tracker);
+            
+            trackerColor = stage.builtin.controllers.PropertyController(tracker, 'color', @(s)double(s.time + (1/s.frameRate) < presentation.duration));
+            presentation.addController(trackerColor);
+            
+            if obj.getPrerender()
+                player = stage.builtin.players.PrerenderedPlayer(presentation);
             else
-                fprintf('Unable to receive ACK\n')
+                player = stage.builtin.players.RealtimePlayer(presentation);
             end
+            obj.stageClient.play(player);
         end
         
-        function clear(obj)
-            % clear screen
-            fwrite(obj.serialPort,[255,130]);
-            %msg=fread(obj.serialPort,1);
+        function replay(obj)
+            obj.stageClient.replay();
         end
         
-        function spot(obj,centerX,centerY,radius,hexcolor1,hexcolor2)
-            % spot(obj,centerX,centerY,radius,hexcolor1,hexcolor2)
-            % radius in pixels, color in hexadecimal format
-            % default color is white
-            if isempty(hexcolor1)
-                hexcolor1=255;
-            end
-            if isempty(hexcolor2)
-                hexcolor2=255;
-            end        
-            centerX(centerX>220)=220/2;
-            centerY(centerY>220)=220/2;
-            % Outer circle
-            fwrite(obj.serialPort,[255,119]);
-            fwrite(obj.serialPort,[00,centerX]);
-            fwrite(obj.serialPort,[00,centerY]);
-            fwrite(obj.serialPort,[00,radius]);
-            fwrite(obj.serialPort,[hexcolor1,hexcolor2]);
-            %msg=fread(obj.serialPort,1);
+        function i = getPlayInfo(obj)
+            i = obj.stageClient.getPlayInfo();
         end
         
-        function spot_white(obj,centerX,centerY,radius)
-            obj.spot(centerX,centerY,radius,255,255);
-        end
-        
-        function spot_black(obj,centerX,centerY,radius)
-            obj.spot(centerX,centerY,radius,0,0);
-        end
-        
-        function spot_red(obj,centerX,centerY,radius)
-            obj.spot(centerX,centerY,radius,255/2,0/2);
-        end
-        
-        function ring(obj,centerX,centerY,rInner,rOuter)
-            % Outer circle
-            spot_white(obj,centerX,centerY,rOuter);
-            %Inner circle
-            spot_black(obj,centerX,centerY,rInner); 
-        end
-        
-        function white2black(obj)
-            % makes all white pixels black
-            fwrite(obj.serialPort,[255,105,255,255,000,000]);
-        end
-        
-        function black2white(obj)
-             % makes all black pixels white
-            fwrite(obj.serialPort,[255,105,000,000,255,255]);
-        end
-        
-        function moveRing(obj,stX,stY,fX,fY,rInner,rOuter,frames)
-            obj.clear;
-            
-            deltaX=abs(stX-fX)/frames;
-            deltaY=abs(stY-fY)/frames;
-            
-            for f=0:frames
-                if f>0
-%                     obj.spot_black(stX+(deltaX*(f-1)),stY+(deltaY*(f-1)),rOuter);
-                end
-                obj.spot_white(stX+(deltaX*f),stY+(deltaY*f),rOuter);
-                obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rInner);
-            end
+        function clearMemory(obj)
+           obj.stageClient.clearMemory();
         end
         
     end
     
 end
+
