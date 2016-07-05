@@ -31,7 +31,7 @@ classdef (Abstract) SquirrelLabProtocolStage < squirrellab.protocols.SquirrelLab
         end
         
         function completeRun(obj)
-            completeRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            completeRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             obj.rig.getDevice('Stage').clearMemory();
         end
         

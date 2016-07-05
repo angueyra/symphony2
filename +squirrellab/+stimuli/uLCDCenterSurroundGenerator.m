@@ -1,8 +1,8 @@
 classdef uLCDCenterSurroundGenerator < squirrellab.stimuli.uLCDStimulus
     properties
-        spotpreTime               % Spot leading duration (ms)
-        spotstimTime             % Spot duration (ms)
-        spottailTime              % Spot trailing duration (ms)
+        preTime               % Spot leading duration (ms)
+        stimTime             % Spot duration (ms)
+        tailTime              % Spot trailing duration (ms)
         ringdelayTime               % Ring leading duration (ms)
         ringstimTime              % Ring duration (ms)
         spotDiameter               % Spot diameter size (pixels)
@@ -10,7 +10,7 @@ classdef uLCDCenterSurroundGenerator < squirrellab.stimuli.uLCDStimulus
         centerX                   % Spot x center (pixels)
         centerY
         spotFlag = 0;
-        ringFlag = 1;
+        ringFlag = 0;
     end
     
     methods

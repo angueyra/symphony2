@@ -1,6 +1,6 @@
-classdef iTwoPhotonStage_uLCDNonAmp < squirrellab.rigs.iTwoPhotonStage_NonAmp   
- 
-   methods
+classdef iTwoPhotonStage_uLCDOneAmp < squirrellab.rigs.iTwoPhotonStage_OneAmp
+
+    methods
         
         function obj = iTwoPhotonStage_uLCDOneAmp()
             import symphonyui.builtin.devices.*;
@@ -24,3 +24,4 @@ classdef iTwoPhotonStage_uLCDNonAmp < squirrellab.rigs.iTwoPhotonStage_NonAmp
         
     end
 end
+    

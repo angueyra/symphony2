@@ -28,6 +28,10 @@ classdef uLCDObj < handle
             fclose(obj.serialPort);
         end
         
+        function close(obj)
+            fclose(obj.serialPort);
+        end
+        
         function testconnection(obj)
             % Test connection by clearing screen and receiving acknowledgement
             fwrite(obj.serialPort,[255,130]);

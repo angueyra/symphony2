@@ -1,8 +1,9 @@
 function cmdCount = uLCDCenterSurroundController(state)
+    fprintf('controller hi\n')
     uStim=state.handles{1};
     u=uStim.uLCD;
     cmdCount = uStim.cmdCount;
-    if state.time < 0.5 && state.time < 0.6
+    if state.time < 0.5 %&& state.time < 0.6
         cmdCount = cmdCount + 1;
         u.spot_white(110,110,10);
     elseif state.time >= 0.5 && state.time < 0.6
@@ -18,5 +19,5 @@ function cmdCount = uLCDCenterSurroundController(state)
         u.clear;
     end
 
-    uStim.cmdCount = cmdCount;
+    uStim.cmdCount = cmdCount
 end
