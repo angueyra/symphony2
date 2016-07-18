@@ -9,8 +9,8 @@ classdef uLCDCenterSurroundGenerator < squirrellab.stimuli.uLCDStimulus
         ringDiameter              % Spot diameter size (pixels)
         centerX                   % Spot x center (pixels)
         centerY
-        spotFlag = 0;
-        ringFlag = 0;
+        spotFlag = 1;
+        ringFlag = 1;
     end
     
     methods

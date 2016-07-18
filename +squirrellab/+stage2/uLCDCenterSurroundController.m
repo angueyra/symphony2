@@ -1,23 +1,19 @@
-function cmdCount = uLCDCenterSurroundController(state)
-    fprintf('controller hi\n')
+function spotFlag = uLCDCenterSurroundController(state)
+    global u
     uStim=state.handles{1};
-    u=uStim.uLCD;
-    cmdCount = uStim.cmdCount;
-    if state.time < 0.5 %&& state.time < 0.6
-        cmdCount = cmdCount + 1;
-        u.spot_white(110,110,10);
-    elseif state.time >= 0.5 && state.time < 0.6
-        cmdCount = cmdCount + 1;
-        u.ring_white(110,110,10,25);
-        fprintf('made it here, only once?\n')
-        disp(cmdFlag2)
-    %     fprintf('This is when i would send command\n')
-    %     fprintf('\tFrame = %g  ',state.frame)
-    %     fprintf('Time = %g s\n',state.time)
-    elseif state.time >= 0.6
-        cmdCount = cmdCount + 1;
+    if state.time >= uStim.preTime && state.time < (uStim.preTime+uStim.ringdelayTime) && uStim.spotFlag
+        u.spot_white(uStim.centerX,uStim.centerY,uStim.spotDiameter);
+        uStim.spotFlag=0;
+    elseif state.time >= uStim.preTime+uStim.ringdelayTime && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimTime) && uStim.ringFlag
+        u.spot_white(uStim.centerX,uStim.centerY,uStim.ringDiameter);
+        uStim.ringFlag=0;
+        uStim.spotFlag=1;
+    elseif state.time >= (uStim.preTime+uStim.ringdelayTime+uStim.ringstimTime) && state.time < (uStim.preTime+uStim.stimTime) && uStim.spotFlag
+        u.spot_white(uStim.centerX,uStim.centerY,uStim.spotDiameter);
+        uStim.spotFlag=0;
+        uStim.ringFlag=0;
+    elseif state.time >= (uStim.preTime+uStim.stimTime)
         u.clear;
     end
-
-    uStim.cmdCount = cmdCount
+    spotFlag=uStim.spotFlag;
 end

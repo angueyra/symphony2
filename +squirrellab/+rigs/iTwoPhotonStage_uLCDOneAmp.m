@@ -6,7 +6,7 @@ classdef iTwoPhotonStage_uLCDOneAmp < squirrellab.rigs.iTwoPhotonStage_OneAmp
             import symphonyui.builtin.devices.*;
             
             uLCD = squirrellab.devices.uLCDDevice('comPort','COM9');
-            uLCD.serial.connect();           
+%             uLCD.serial.connect();           
             fprintf('Initialized uLCD\n')
             % Binding the uLCD to an unused stream only so its configuration settings are written to each epoch.
             daq = obj.daqController;

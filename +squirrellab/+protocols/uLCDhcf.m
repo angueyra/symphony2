@@ -1,17 +1,17 @@
-classdef uLCDhcf < squirrellab.protocols.SquirrelLabProtocolStage
+classdef uLCDhcf < io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
         ulcd                            % uLCD screen
         centerX = 110                   % Spot x center (pixels)
         centerY = 110                   % Spot y center (pixels)
-        preTime = 500               % Spot leading duration (ms)
-        stimTime = 1000             % Spot duration (ms)
-        tailTime = 500              % Spot trailing duration (ms)
-        ringdelayTime = 250               % Ring leading duration (ms)
+        preTime = 500                   % Spot leading duration (ms)
+        stimTime = 1000                 % Spot duration (ms)
+        tailTime = 500                  % Spot trailing duration (ms)
+        ringdelayTime = 250             % Ring leading duration (ms)
         ringstimTime = 500              % Ring duration (ms)
         spotDiameter = 10               % Spot diameter size (pixels)
-        ringDiameter = 100              % Spot diameter size (pixels)
+        ringDiameter = 50              % Spot diameter size (pixels)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
@@ -24,7 +24,7 @@ classdef uLCDhcf < squirrellab.protocols.SquirrelLabProtocolStage
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabProtocolStage(obj);
+            didSetRig@io.github.stage_vss.protocols.StageProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
             [obj.ulcd, obj.ulcdType] = obj.createDeviceNamesProperty('uLCD');
@@ -40,40 +40,57 @@ classdef uLCDhcf < squirrellab.protocols.SquirrelLabProtocolStage
 %         end
         
         function prepareRun(obj)
-            prepareRun@squirrellab.protocols.SquirrelLabProtocolStage(obj);
+            prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
 %             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
 %             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
         end
         
         function p = createPresentation(obj)
-            device = obj.rig.getDevice('Stage');
-            canvasSize = device.getCanvasSize();
-            ulcd = obj.rig.getDevice('uLCD');
+%             device = obj.rig.getDevice('Stage');
+% %             canvasSize = device.getCanvasSize();
+%             uLCD = obj.rig.getDevice('uLCD');
             p = stage.core.Presentation((obj.preTime + obj.stimTime + obj.tailTime) * 1e-3);
+            p.setBackgroundColor(0);
             
-            uLCDStim=squirrellab.stimuli.uLCDCenterSurroundGenerator();
-            uLCDStim.centerX=obj.centerX;
-            uLCDStim.centerY=obj.centerY;
-            uLCDStim.preTime=obj.preTime;
-            uLCDStim.stimTime=obj.stimTime;
-            uLCDStim.tailTime=obj.tailTime;
-            uLCDStim.ringdelayTime=obj.ringdelayTime;
-            uLCDStim.ringstimTime=obj.ringstimTime;
-            uLCDStim.spotDiameter=obj.spotDiameter;
-            uLCDStim.ringDiameter=obj.ringDiameter;
-            uLCDStim.uLCD=ulcd.serial;
-%             ulcd.serial.spot_red(100,100,10);
-            ulcd.serial.clear(); %HERE HERE HERE
-            p.addStimulus(uLCDStim);
+            uStim=squirrellab.stimuli.uLCDCenterSurroundGenerator();
+            uStim.centerX=obj.centerX;
+            uStim.centerY=obj.centerY;
+            uStim.preTime=obj.preTime*1e-3;
+            uStim.stimTime=obj.stimTime*1e-3;
+            uStim.tailTime=obj.tailTime*1e-3;
+            uStim.ringdelayTime=obj.ringdelayTime*1e-3;
+            uStim.ringstimTime=obj.ringstimTime*1e-3;
+            uStim.spotDiameter=obj.spotDiameter;
+            uStim.ringDiameter=obj.ringDiameter;
+            p.addStimulus(uStim);
             
-%             uLCDCMD = stage.builtin.controllers.PropertyController(uLCDStim, 'cmdCount', @squirrellab.stage2.uLCDCenterSurroundController);
-            uLCDCMD = squirrellab.stage2.uLCDCenterSurroundController(uLCDStim);
+            uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDCenterSurroundController(state));
             p.addController(uLCDCMD);
+            
+            center = stage.builtin.stimuli.Ellipse();
+            center.color = 1;
+            center.radiusX = obj.spotDiameter;
+            center.radiusY = obj.spotDiameter;
+            center.position = [obj.centerX, obj.centerY];
+            p.addStimulus(center);        
+            centerVisible = stage.builtin.controllers.PropertyController(center, 'visible',...
+                @(state)state.time >= uStim.preTime && state.time < (uStim.preTime + uStim.stimTime));
+            p.addController(centerVisible);
+            
+            sourround = stage.builtin.stimuli.Ellipse();
+            sourround.color = 1;
+            sourround.radiusX = obj.ringDiameter;
+            sourround.radiusY = obj.ringDiameter;
+            sourround.position = [obj.centerX, obj.centerY];
+            p.addStimulus(sourround);
+            sourroundVisible = stage.builtin.controllers.PropertyController(sourround, 'visible',...
+                @(state)state.time >= (uStim.preTime+uStim.ringdelayTime) && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimeTime));
+            p.addController(sourroundVisible);
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabProtocolStage(obj, epoch);
+            prepareEpoch@io.github.stage_vss.protocols.StageProtocol(obj, epoch);
             
             device = obj.rig.getDevice(obj.amp);
             duration = (obj.preTime + obj.stimTime + obj.tailTime) / 1e3;
@@ -82,7 +99,7 @@ classdef uLCDhcf < squirrellab.protocols.SquirrelLabProtocolStage
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabProtocolStage(obj, interval);
+            prepareInterval@io.github.stage_vss.protocols.StageProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

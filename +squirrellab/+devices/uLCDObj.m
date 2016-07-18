@@ -82,11 +82,18 @@ classdef uLCDObj < handle
             obj.spot(centerX,centerY,radius,255/2,0/2);
         end
         
-        function ring(obj,centerX,centerY,rInner,rOuter)
+        function ring_white(obj,centerX,centerY,rInner,rOuter)
             % Outer circle
             spot_white(obj,centerX,centerY,rOuter);
             %Inner circle
             spot_black(obj,centerX,centerY,rInner); 
+        end
+        
+        function ring_black(obj,centerX,centerY,rInner,rOuter)
+            % Outer circle
+            spot_black(obj,centerX,centerY,rOuter);
+            %Inner circle
+            spot_white(obj,centerX,centerY,rInner); 
         end
         
         function white2black(obj)

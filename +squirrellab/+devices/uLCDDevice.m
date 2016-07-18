@@ -14,14 +14,14 @@ classdef uLCDDevice < symphonyui.core.Device
             cobj.MeasurementConversionTarget = symphonyui.core.Measurement.UNITLESS;
             obj@symphonyui.core.Device(cobj);
             
-            obj.serial = squirrellab.devices.uLCDObj(ip.Results.comPort);
+            obj.serial = 'COM9';%squirrellab.devices.uLCDObj(ip.Results.comPort);
             fprintf('Connected to uLCD\n')
         end
         
         function close(obj)
-            if ~isempty(obj.serial)
-                obj.serial.disconnect();
-            end
+%             if ~isempty(obj.serial)
+%                 obj.serial.disconnect();
+%             end
         end
   
     end
