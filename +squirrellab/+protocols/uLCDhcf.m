@@ -78,15 +78,15 @@ classdef uLCDhcf < io.github.stage_vss.protocols.StageProtocol
                 @(state)state.time >= uStim.preTime && state.time < (uStim.preTime + uStim.stimTime));
             p.addController(centerVisible);
             
-            sourround = stage.builtin.stimuli.Ellipse();
-            sourround.color = 1;
-            sourround.radiusX = obj.ringDiameter;
-            sourround.radiusY = obj.ringDiameter;
-            sourround.position = [obj.centerX, obj.centerY];
-            p.addStimulus(sourround);
-            sourroundVisible = stage.builtin.controllers.PropertyController(sourround, 'visible',...
-                @(state)state.time >= (uStim.preTime+uStim.ringdelayTime) && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimeTime));
-            p.addController(sourroundVisible);
+            surround = stage.builtin.stimuli.Ellipse();
+            surround.color = 1;
+            surround.radiusX = obj.ringDiameter;
+            surround.radiusY = obj.ringDiameter;
+            surround.position = [obj.centerX, obj.centerY];
+            p.addStimulus(surround);
+            surroundVisible = stage.builtin.controllers.PropertyController(surround, 'visible',...
+                @(state)state.time >= (uStim.preTime+uStim.ringdelayTime) && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimTime));
+            p.addController(surroundVisible);
         end
         
         function prepareEpoch(obj, epoch)

@@ -6,10 +6,10 @@ classdef SingleSpot < io.github.stage_vss.protocols.StageProtocol
         stimTime = 1000                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
         spotIntensity = 1.0             % Spot light intensity (0-1)
-        spotDiameter = 300              % Spot diameter size (pixels)
-        backgroundIntensity = 0.5       % Background light intensity (0-1)
+        spotDiameter = 20              % Spot diameter size (pixels)
+        backgroundIntensity = 0.0       % Background light intensity (0-1)
         centerOffset = [0, 0]           % Spot [x, y] center offset (pixels)
-        numberOfAverages = uint16(5)    % Number of epochs
+        numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
     

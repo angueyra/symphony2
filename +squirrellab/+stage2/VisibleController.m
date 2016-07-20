@@ -1,7 +1,8 @@
 function pop = VisibleController(state)
-    global a
+    global u
+    disp('state.frame')
     if state.frame == 1
-        a.clear;
+        u.clear;
     end
     if state.time >= .5 && state.time < 1.5
         if ~flag
@@ -9,9 +10,11 @@ function pop = VisibleController(state)
             flag=1;
         end 
         pop=1;
-        a.ring_white(110,110,15,20);
+        u.ring_white(110,110,15,20);
+        fprintf('ring time\n')
     else
         pop=0;
-        a.spot_white(110,110,10);
+        u.spot_white(110,110,10);
+        fprintf('spot time\n')
     end
 end
