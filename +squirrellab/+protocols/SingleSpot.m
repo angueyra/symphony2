@@ -55,8 +55,8 @@ classdef SingleSpot < io.github.stage_vss.protocols.StageProtocol
             spot.position = canvasSize/2 + obj.centerOffset;
             p.addStimulus(spot);
             
-%             spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)state.time >= obj.preTime * 1e-3 && state.time < (obj.preTime + obj.stimTime) * 1e-3);
-            spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)squirrellab.stage2.VisibleController(state));
+            spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)state.time >= obj.preTime * 1e-3 && state.time < (obj.preTime + obj.stimTime) * 1e-3);
+%             spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)squirrellab.stage2.VisibleController(state));
             p.addController(spotVisible);
         end
         

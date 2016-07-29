@@ -1,3 +1,4 @@
+
 classdef uLCDObj < handle
     
     properties %(Access = private, Transient)
@@ -8,7 +9,11 @@ classdef uLCDObj < handle
         
         function obj = uLCDObj(port)
             if nargin < 1
-                port = 'COM9';
+                if strcmpi(util.getComputerID,'.B9655E47BAE8.C73F818834B3')
+                    port = 'COM3';
+                else
+                    port = 'COM9';
+                end
             end
 
             obj.serialPort = serial(port,'BaudRate',875000);%default=9600%max=875000 

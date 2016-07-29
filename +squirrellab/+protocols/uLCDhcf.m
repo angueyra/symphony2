@@ -42,8 +42,8 @@ classdef uLCDhcf < io.github.stage_vss.protocols.StageProtocol
         function prepareRun(obj)
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
-%             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-%             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
         end
         
         function p = createPresentation(obj)

@@ -1,8 +1,8 @@
-classdef RigA_OneAmp < symphonyui.core.descriptions.RigDescription
+classdef RigA_OneAmpStage < symphonyui.core.descriptions.RigDescription
     
     methods
         
-        function obj = RigA_OneAmp()
+        function obj = RigA_OneAmpStage()
             import symphonyui.builtin.daqs.*;
             import symphonyui.builtin.devices.*;
             import symphonyui.core.*;
@@ -35,7 +35,8 @@ classdef RigA_OneAmp < symphonyui.core.descriptions.RigDescription
             daq.getStream('DIGITAL_OUT.1').setBitPosition(trigger, 0);
             obj.addDevice(trigger);
             
-            
+            stage = io.github.stage_vss.devices.StageDevice('localhost');
+            obj.addDevice(stage);
         end
         
     end

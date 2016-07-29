@@ -9,7 +9,7 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
         lightMean = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
         frame                           % Frame monitor
-        numberOfAverages = uint16(5)    % Number of epochs
+        numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between pulses (s)
     end
     
@@ -36,8 +36,8 @@ classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
         function prepareRun(obj)
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
-            obj.showFigure('squirrellab.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
             obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
