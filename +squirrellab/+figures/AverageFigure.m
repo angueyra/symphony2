@@ -31,7 +31,6 @@ classdef AverageFigure < symphonyui.core.FigureHandler
             obj.sweepColor = ip.Results.sweepColor;
             obj.storedSweepColor = ip.Results.storedSweepColor;
             obj.prePts = prePts;
-            fprintf('prePts = %g ms\n',obj.prePts)
             
             obj.createUi();
         end

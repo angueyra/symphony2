@@ -1,17 +1,17 @@
-classdef uLCDhcf < io.github.stage_vss.protocols.StageProtocol
+classdef uLCDhcf < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
         ulcd                            % uLCD screen
-        centerX = 110                   % Spot x center (pixels)
-        centerY = 110                   % Spot y center (pixels)
+        centerX = 114                   % Spot x center (pixels)
+        centerY = 114                   % Spot y center (pixels)
         preTime = 500                   % Spot leading duration (ms)
         stimTime = 1000                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
         ringdelayTime = 250             % Ring leading duration (ms)
         ringstimTime = 500              % Ring duration (ms)
-        spotDiameter = 10               % Spot diameter size (pixels)
-        ringDiameter = 50              % Spot diameter size (pixels)
+        spotDiameter = 3               % Spot diameter size (pixels)
+        ringDiameter = 20              % Spot diameter size (pixels)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
@@ -42,8 +42,8 @@ classdef uLCDhcf < io.github.stage_vss.protocols.StageProtocol
         function prepareRun(obj)
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
         end
         
         function p = createPresentation(obj)
