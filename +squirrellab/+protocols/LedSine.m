@@ -1,12 +1,13 @@
-classdef LedPulse < squirrellab.protocols.SquirrelLabProtocol
+classdef LedSine < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         led                             % Output LED
-        preTime = 10                    % Pulse leading duration (ms)
-        stimTime = 100                  % Pulse duration (ms)
-        tailTime = 400                  % Pulse trailing duration (ms)
-        lightAmplitude = 5              % Pulse amplitude (V)
-        lightMean = 0                   % Pulse and LED background mean (V)
+        preTime = 100                    % Pulse leading duration (ms)
+        stimTime = 500                  % Pulse duration (ms)
+        tailTime = 100                  % Pulse trailing duration (ms)
+        lightMean = 5                   % Pulse and LED background mean (V)
+        lightAmplitude = 2              % Pulse amplitude (V)
+        phaseShift = 0                  % Phase
         amp                             % Input amplifier
         frame                           % Frame monitor
         numberOfAverages = uint16(1)    % Number of epochs

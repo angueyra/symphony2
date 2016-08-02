@@ -30,6 +30,7 @@ classdef (Abstract) SquirrelLabProtocol < symphonyui.core.Protocol
                 epoch.removeResponse(T5Controller{1});
             end
         end
+        
         function pts = timeToPts (obj, t)
             pts = round(t / 1e3 * obj.sampleRate);
         end
