@@ -1,14 +1,18 @@
-classdef LedSine < squirrellab.protocols.SquirrelLabProtocol
+classdef LedConeTyping < squirrellab.protocols.SquirrelLabProtocol
     
     properties
-        led                             % Output LED
-        preTime = 100                    % Pulse leading duration (ms)
-        stimTime = 1000                  % Pulse duration (ms)
-        tailTime = 100                  % Pulse trailing duration (ms)
-        lightMean = 5                   % Pulse and LED background mean (V)
-        lightAmplitude = 2              % Pulse amplitude (V)
-        phaseShift = 0                  % Phase
-        sineFreq = 5                  % Phase
+        led1                            % Output LED
+        led2                            % Output LED
+        led3                            % Output LED
+        preTime = 200                    % Pulse leading duration (ms)
+        stimTime = 10                  % Pulse duration (ms)
+        tailTime = 890                  % Pulse trailing duration (ms)
+        lightAmplitude1 = 6              % Pulse amplitude (V)
+        lightMean1 = 0                   % Pulse and LED background mean (V)
+        lightAmplitude2 = 6              % Pulse amplitude (V)
+        lightMean2 = 0                   % Pulse and LED background mean (V)
+        lightAmplitude3 = 6              % Pulse amplitude (V)
+        lightMean3 = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
         frame                           % Frame monitor
         numberOfAverages = uint16(1)    % Number of epochs
@@ -48,17 +52,15 @@ classdef LedSine < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function stim = createLedStimulus(obj)
-            gen = symphonyui.builtin.stimuli.SineGenerator();
+            gen = symphonyui.builtin.stimuli.PulseGenerator();
             
             gen.preTime = obj.preTime;
             gen.stimTime = obj.stimTime;
             gen.tailTime = obj.tailTime;
-            gen.period = 1000/obj.sineFreq;
-            gen.phase = obj.phaseShift;
-            gen.mean = obj.lightMean;
             gen.amplitude = obj.lightAmplitude;
+            gen.mean = obj.lightMean;
             gen.sampleRate = obj.sampleRate;
-            gen.units = obj.rig.getDevice(obj.led).background.displayUnits;
+            gen.units = 'V';
             
             stim = gen.generate();
         end
@@ -83,16 +85,6 @@ classdef LedSine < squirrellab.protocols.SquirrelLabProtocol
         
         function tf = shouldContinueRun(obj)
             tf = obj.numEpochsCompleted < obj.numberOfAverages;
-        end
-        
-        function completeRun(obj)
-            completeRun@squirrellab.protocols.SquirrelLabProtocol(obj);
-            
-            disp('completed')
-            %turn off LED after running all epochs
-            device=obj.rig.getDevice(obj.led);
-            device.background = symphonyui.core.Measurement(0, 'V');
-            device.applyBackground();
         end
         
     end

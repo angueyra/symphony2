@@ -55,8 +55,8 @@ classdef uLCDhcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
             gen.preTime = obj.preTime;
             gen.stimTime = obj.stimTime;
             gen.tailTime = obj.tailTime;
-            gen.amplitude = obj.lightAmplitude;
-            gen.mean = obj.lightMean;
+            gen.amplitude = 8;%obj.lightAmplitude;
+            gen.mean = 0;%obj.lightMean;
             gen.sampleRate = obj.sampleRate;
             gen.units = 'V';
             
