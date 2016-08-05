@@ -26,6 +26,7 @@ classdef uLCDObj < handle
         
         function connect(obj)
             fopen(obj.serialPort);
+            pause(5);
             obj.testconnection;
         end
         

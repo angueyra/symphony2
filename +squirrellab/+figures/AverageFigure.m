@@ -115,7 +115,7 @@ classdef AverageFigure < symphonyui.core.FigureHandler
             else
                 sweep = obj.sweeps{sweepIndex};
                 cy = get(sweep.line, 'YData');
-                set(sweep.line, 'YData', obj.subBaseline((cy * sweep.count + y) / (sweep.count + 1)));
+                set(sweep.line, 'YData', (cy * sweep.count + obj.subBaseline(y)) / (sweep.count + 1));
                 sweep.count = sweep.count + 1;
                 obj.sweeps{sweepIndex} = sweep;
             end
