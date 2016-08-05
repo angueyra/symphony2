@@ -1,4 +1,4 @@
-classdef SealAndLeak < squirrellab.protocols.SquirrelLabProtocol
+classdef aSealAndLeak < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         amp                             % Output amplifier

@@ -1,4 +1,4 @@
-classdef Ramp < squirrellab.protocols.SquirrelLabProtocol
+classdef vRamp < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         amp                             % Output amplifier

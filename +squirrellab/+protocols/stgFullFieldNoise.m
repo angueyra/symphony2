@@ -1,16 +1,14 @@
-classdef SingleSpot < io.github.stage_vss.protocols.StageProtocol
+classdef stgFullFieldNoise < io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
-        preTime = 500                   % Spot leading duration (ms)
-        stimTime = 1000                 % Spot duration (ms)
-        tailTime = 500                  % Spot trailing duration (ms)
-        spotIntensity = 1.0             % Spot light intensity (0-1)
-        spotDiameter = 20              % Spot diameter size (pixels)
-        backgroundIntensity = 0.0       % Background light intensity (0-1)
-        centerOffset = [0, 0]           % Spot [x, y] center offset (pixels)
-        numberOfAverages = uint16(1)    % Number of epochs
-        interpulseInterval = 0          % Duration between spots (s)
+        preTime = 500                   % Noise leading duration (ms)
+        stimTime = 1000                 % Noise duration (ms)
+        tailTime = 500                  % Noise trailing duration (ms)
+        backgroundIntensity = 0.5       % Background light intensity (0-1)
+        centerOffset = [0, 0]           % Noise [x, y] center offset (pixels)
+        numberOfAverages = uint16(5)    % Number of epochs
+        interpulseInterval = 0          % Duration between noise (s)
     end
     
     properties (Hidden)
@@ -37,9 +35,9 @@ classdef SingleSpot < io.github.stage_vss.protocols.StageProtocol
         function prepareRun(obj)
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
-%             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-%             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
-%             obj.showFigure('io.github.stage_vss.figures.FrameTimingFigure', obj.rig.getDevice('Stage'));
+            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('io.github.stage_vss.figures.FrameTimingFigure', obj.rig.getDevice('Stage'));
         end
         
         function p = createPresentation(obj)
@@ -48,16 +46,16 @@ classdef SingleSpot < io.github.stage_vss.protocols.StageProtocol
             p = stage.core.Presentation((obj.preTime + obj.stimTime + obj.tailTime) * 1e-3);
             p.setBackgroundColor(obj.backgroundIntensity);
             
-            spot = stage.builtin.stimuli.Ellipse();
-            spot.color = obj.spotIntensity;
-            spot.radiusX = obj.spotDiameter/2;
-            spot.radiusY = obj.spotDiameter/2;
-            spot.position = canvasSize/2 + obj.centerOffset;
-            p.addStimulus(spot);
+            noise = stage.builtin.stimuli.Rectangle();
+            noise.size = canvasSize*2;
+            noise.position = canvasSize/2 + obj.centerOffset;
+            p.addStimulus(noise);
             
-            spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)state.time >= obj.preTime * 1e-3 && state.time < (obj.preTime + obj.stimTime) * 1e-3);
-%             spotVisible = stage.builtin.controllers.PropertyController(spot, 'visible', @(state)squirrellab.stage2.VisibleController(state));
-            p.addController(spotVisible);
+            noiseColor = stage.builtin.controllers.PropertyController(noise, 'color', @(state)rand());
+            p.addController(noiseColor);
+            
+            noiseVisible = stage.builtin.controllers.PropertyController(noise, 'visible', @(state)state.time >= obj.preTime * 1e-3 && state.time < (obj.preTime + obj.stimTime) * 1e-3);
+            p.addController(noiseVisible);
         end
         
         function prepareEpoch(obj, epoch)

@@ -1,4 +1,4 @@
-classdef RedBlueSine < squirrellab.protocols.SquirrelLabProtocol
+classdef ledRedBlueSine < squirrellab.protocols.SquirrelLabProtocol
     %sine test code
     
     properties

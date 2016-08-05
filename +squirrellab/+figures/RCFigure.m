@@ -1,4 +1,4 @@
-classdef DataFigure < symphonyui.core.FigureHandler
+classdef RCFigure < symphonyui.core.FigureHandler
     % Plots the response of a specified device in the most recent epoch.
 
     properties (SetAccess = private)
@@ -15,7 +15,7 @@ classdef DataFigure < symphonyui.core.FigureHandler
 
     methods
 
-        function obj = DataFigure(device, varargin)
+        function obj = RCFigure(device, varargin)
             co = get(groot, 'defaultAxesColorOrder');
             
             ip = inputParser();
@@ -65,7 +65,7 @@ classdef DataFigure < symphonyui.core.FigureHandler
             if ~epoch.hasResponse(obj.device)
                 error(['Epoch does not contain a response for ' obj.device.name]);
             end
-            if ~epoch.parameters.isKey.('RCepoch')
+            if epoch.parameters.isKey.('RCepoch')
                 response = epoch.getResponse(obj.device);
                 [quantities, units] = response.getData();
                 if numel(quantities) > 0
@@ -81,7 +81,11 @@ classdef DataFigure < symphonyui.core.FigureHandler
                     set(obj.sweep, 'XData', x, 'YData', y);
                 end
                 ylabel(obj.axesHandle, units, 'Interpreter', 'none');
+            else
+                disp(0)
             end
+            
+
         end
 
     end

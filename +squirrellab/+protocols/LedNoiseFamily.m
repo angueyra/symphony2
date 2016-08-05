@@ -1,4 +1,4 @@
-classdef LedNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
+classdef ledNoiseFamily < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         led                             % Output LED

@@ -1,4 +1,4 @@
-classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
+classdef ledTest < squirrellab.protocols.SquirrelLabAutoRCProtocol
     
     properties
         led                             % Output LED
@@ -8,7 +8,6 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
         lightAmplitude = 5              % Pulse amplitude (V)
         lightMean = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
-        frame                           % Frame monitor
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between pulses (s)
     end
@@ -16,17 +15,15 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
     properties (Hidden)
         ledType
         ampType
-        frameType
     end
     
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             [obj.led, obj.ledType] = obj.createDeviceNamesProperty('LED');
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
-            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
         end
         
         function p = getPreview(obj, panel)
@@ -34,7 +31,7 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
@@ -60,10 +57,13 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
-            
-            epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
-            epoch.addResponse(obj.rig.getDevice(obj.amp));
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, epoch);
+            if obj.runRC
+                % Superclass runs RC epoch
+            else %run normally
+                epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
+                epoch.addResponse(obj.rig.getDevice(obj.amp));
+            end
         end
         
         function prepareInterval(obj, interval)

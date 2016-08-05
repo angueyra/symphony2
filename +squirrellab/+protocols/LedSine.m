@@ -1,4 +1,4 @@
-classdef LedSine < squirrellab.protocols.SquirrelLabProtocol
+classdef ledSine < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         led                             % Output LED
