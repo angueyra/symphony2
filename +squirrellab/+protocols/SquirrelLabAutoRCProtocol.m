@@ -28,7 +28,7 @@ classdef (Abstract) SquirrelLabAutoRCProtocol < squirrellab.protocols.SquirrelLa
             if obj.autoRC
                 obj.runRC = true;
                 % Open RC figure
-                obj.showFigure('squirrellab.figures.CustomFigure', @obj.updateFigure);
+                obj.showFigure('squirrellab.figures.RCFigure', @obj.updateFigure);
             else
                 obj.runRC = false;
             end
@@ -38,9 +38,6 @@ classdef (Abstract) SquirrelLabAutoRCProtocol < squirrellab.protocols.SquirrelLa
             if obj.numEpochsCompleted == 0 && obj.RCEpochsCompleted == 1
                 disp('init')
                 obj.plotData.figure = custFigObj.getFigureHandle();
-                % make figure current
-                % figure(figHand);
-                % add axes
                 obj.plotData.axes = axes('Parent', obj.plotData.figure, 'NextPlot', 'replace');
                 
                 
