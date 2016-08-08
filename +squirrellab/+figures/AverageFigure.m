@@ -13,7 +13,7 @@ classdef AverageFigure < symphonyui.core.FigureHandler
         axesHandle
         sweeps
         sweepIndex
-        storedSweeps
+        storedSweep
     end
     
     methods
@@ -38,13 +38,13 @@ classdef AverageFigure < symphonyui.core.FigureHandler
         
         function createUi(obj)
             import appbox.*;
-            iconDir = [fileparts(fileparts(mfilename('fullpath'))), '\+util\+icons\'];
+            iconDir = [fileparts(fileparts(fileparts(mfilename('fullpath')))), '\+util\+icons\'];
             toolbar = findall(obj.figureHandle, 'Type', 'uitoolbar');
             storeSweepsButton = uipushtool( ...
                 'Parent', toolbar, ...
                 'TooltipString', 'Store Sweeps', ...
                 'Separator', 'on', ...
-                'ClickedCallback', @obj.onSelectedStoreSweeps);
+                'ClickedCallback', @obj.onSelectedStoreSweep);
             setIconImage(storeSweepsButton, symphonyui.app.App.getResource('icons', 'sweep_store.png'));
             
             clearStoredButton = uipushtool( ...
@@ -185,7 +185,9 @@ classdef AverageFigure < symphonyui.core.FigureHandler
 
         function onSelectedClearStored(obj, ~, ~)
             obj.storedAverages('Clear');
-            obj.storedSweep.line.delete
+            if isfield(obj.storedSweep,'line')
+                obj.storedSweep.line.delete
+            end
         end
 
     end
