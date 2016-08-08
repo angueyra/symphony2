@@ -12,6 +12,7 @@ classdef AverageFigure < symphonyui.core.FigureHandler
     properties (Access = private)
         axesHandle
         sweeps
+        sweepIndex
         storedSweeps
     end
     
@@ -37,7 +38,7 @@ classdef AverageFigure < symphonyui.core.FigureHandler
         
         function createUi(obj)
             import appbox.*;
-            
+            iconDir = [fileparts(fileparts(mfilename('fullpath'))), '\+util\+icons\'];
             toolbar = findall(obj.figureHandle, 'Type', 'uitoolbar');
             storeSweepsButton = uipushtool( ...
                 'Parent', toolbar, ...
@@ -45,6 +46,13 @@ classdef AverageFigure < symphonyui.core.FigureHandler
                 'Separator', 'on', ...
                 'ClickedCallback', @obj.onSelectedStoreSweeps);
             setIconImage(storeSweepsButton, symphonyui.app.App.getResource('icons', 'sweep_store.png'));
+            
+            clearStoredButton = uipushtool( ...
+                'Parent', toolbar, ...
+                'TooltipString', 'Clear saved sweep', ...
+                'Separator', 'off', ...
+                'ClickedCallback', @obj.onSelectedClearStored);
+            setIconImage(clearStoredButton, [iconDir, 'Xout.png']);
             
             obj.axesHandle = axes( ...
                 'Parent', obj.figureHandle, ...
@@ -100,26 +108,43 @@ classdef AverageFigure < symphonyui.core.FigureHandler
                 end
                 obj.setTitle([obj.device.name ' Mean (' t ')']);
                 
-                sweepIndex = [];
+                obj.sweepIndex = [];
                 for i = 1:numel(obj.sweeps)
                     if isequal(obj.sweeps{i}.parameters, parameters)
-                        sweepIndex = i;
+                        obj.sweepIndex = i;
                         break;
                     end
                 end
                 
-                if isempty(sweepIndex)
+                if isempty(obj.sweepIndex)
                     sweep.line = line(x, obj.subBaseline(y), 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
                     sweep.parameters = parameters;
                     sweep.count = 1;
                     obj.sweeps{end + 1} = sweep;
                 else
-                    sweep = obj.sweeps{sweepIndex};
+                    sweep = obj.sweeps{obj.sweepIndex};
                     cy = get(sweep.line, 'YData');
                     set(sweep.line, 'YData', (cy * sweep.count + obj.subBaseline(y)) / (sweep.count + 1));
                     sweep.count = sweep.count + 1;
-                    obj.sweeps{sweepIndex} = sweep;
+                    obj.sweeps{obj.sweepIndex} = sweep;
                 end
+                
+                 %check for stored data to plot...
+                 storedData = obj.storedAverages();
+                 if ~isempty(storedData)
+                     if ~isempty(obj.storedSweep) %Handle still there
+                         if obj.storedSweep.line.isvalid %Line still there
+                             
+                         else
+                             obj.storedSweep.line = line(storedData(1,:), storedData(2,:),...
+                                 'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
+                         end
+                     else %no handle
+                         obj.storedSweep.line = line(storedData(1,:), storedData(2,:),...
+                             'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
+                     end
+                 end
+                 
                 
                 ylabel(obj.axesHandle, units, 'Interpreter', 'none');
             end
@@ -137,22 +162,50 @@ classdef AverageFigure < symphonyui.core.FigureHandler
     
     methods (Access = private)
         
-        function onSelectedStoreSweeps(obj, ~, ~)
-            if ~isempty(obj.storedSweeps)
-                for i = 1:numel(obj.storedSweeps)
-                    delete(obj.storedSweeps{i});
-                end
-                obj.storedSweeps = {};
+        function onSelectedStoreSweep(obj, ~, ~)
+            if isempty(obj.sweepIndex)
+                sweepPull = 1;
+            else
+                sweepPull = obj.sweepIndex;
             end
-            for i = 1:numel(obj.sweeps)
-                obj.storedSweeps{i} = copyobj(obj.sweeps{i}.line, obj.axesHandle);
-                set(obj.storedSweeps{i}, ...
-                    'Color', obj.storedSweepColor, ...
-                    'HandleVisibility', 'off');
+            if ~isempty(obj.storedSweep) %Handle still there
+                if obj.storedSweep.line.isvalid %Line still there
+                    %delete the old storedSweep
+                    obj.onSelectedClearStored(obj)
+                end
+            end
+            
+            %save out stored data
+            obj.storedSweep.line = obj.sweeps{sweepPull}.line;
+            obj.storedAverages([obj.storedSweep.line.XData; obj.storedSweep.line.YData]);
+            %set the saved trace to storedSweepColor to indicate that it has been saved
+            obj.storedSweep.line = line(obj.storedSweep.line.XData, obj.storedSweep.line.YData,...
+                        'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
+        end
+
+        function onSelectedClearStored(obj, ~, ~)
+            obj.storedAverages('Clear');
+            obj.storedSweep.line.delete
+        end
+
+    end
+    
+    methods (Static)
+        
+        function averages = storedAverages(averages)
+            % This method stores means across figure handlers.
+            persistent stored;
+            if (nargin == 0) %retrieve stored data
+               averages = stored;
+            else %set or clear stored data
+                if strcmp(averages,'Clear')
+                    stored = [];
+                else
+                    stored = averages;
+                    averages = stored;
+                end
             end
         end
-        
     end
         
 end
-
