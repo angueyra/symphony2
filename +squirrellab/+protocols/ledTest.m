@@ -15,6 +15,7 @@ classdef ledTest < squirrellab.protocols.SquirrelLabAutoRCProtocol
     properties (Hidden)
         ledType
         ampType
+        plotData
     end
     
     methods

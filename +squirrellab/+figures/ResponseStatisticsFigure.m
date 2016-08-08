@@ -60,41 +60,42 @@ classdef ResponseStatisticsFigure < symphonyui.core.FigureHandler
             if ~epoch.hasResponse(obj.device)
                 error(['Epoch does not contain a response for ' obj.device.name]);
             end
-            
-            response = epoch.getResponse(obj.device);
-            quantities = response.getData();
-            rate = response.sampleRate.quantityInBaseUnits;
-            
-            msToPts = @(t)max(round(t / 1e3 * rate), 1);
-            
-            if ~isempty(obj.baselineRegion)
-                x1 = msToPts(obj.baselineRegion(1));
-                x2 = msToPts(obj.baselineRegion(2));
-                baseline = quantities(x1:x2);
-                quantities = quantities - mean(baseline);
-            end
-            
-            if ~isempty(obj.measurementRegion)
-                x1 = msToPts(obj.measurementRegion(1));
-                x2 = msToPts(obj.measurementRegion(2));
-                quantities = quantities(x1:x2);
-            end           
-            
-            for i = 1:numel(obj.measurementCallbacks)
-                fcn = obj.measurementCallbacks{i};
-                result = fcn(quantities);
-                if numel(obj.markers) < i
-                    colorOrder = get(groot, 'defaultAxesColorOrder');
-                    color = colorOrder(mod(i - 1, size(colorOrder, 1)) + 1, :);
-                    obj.markers(i) = line(1, result, 'Parent', obj.axesHandles(i), ...
-                        'LineStyle', 'none', ...
-                        'Marker', 'o', ...
-                        'MarkerEdgeColor', color, ...
-                        'MarkerFaceColor', color);
-                else
-                    x = get(obj.markers(i), 'XData');
-                    y = get(obj.markers(i), 'YData');
-                    set(obj.markers(i), 'XData', [x x(end)+1], 'YData', [y result]);
+            if ~epoch.parameters.isKey.('RCepoch')
+                response = epoch.getResponse(obj.device);
+                quantities = response.getData();
+                rate = response.sampleRate.quantityInBaseUnits;
+                
+                msToPts = @(t)max(round(t / 1e3 * rate), 1);
+                
+                if ~isempty(obj.baselineRegion)
+                    x1 = msToPts(obj.baselineRegion(1));
+                    x2 = msToPts(obj.baselineRegion(2));
+                    baseline = quantities(x1:x2);
+                    quantities = quantities - mean(baseline);
+                end
+                
+                if ~isempty(obj.measurementRegion)
+                    x1 = msToPts(obj.measurementRegion(1));
+                    x2 = msToPts(obj.measurementRegion(2));
+                    quantities = quantities(x1:x2);
+                end
+                
+                for i = 1:numel(obj.measurementCallbacks)
+                    fcn = obj.measurementCallbacks{i};
+                    result = fcn(quantities);
+                    if numel(obj.markers) < i
+                        colorOrder = get(groot, 'defaultAxesColorOrder');
+                        color = colorOrder(mod(i - 1, size(colorOrder, 1)) + 1, :);
+                        obj.markers(i) = line(1, result, 'Parent', obj.axesHandles(i), ...
+                            'LineStyle', 'none', ...
+                            'Marker', 'o', ...
+                            'MarkerEdgeColor', color, ...
+                            'MarkerFaceColor', color);
+                    else
+                        x = get(obj.markers(i), 'XData');
+                        y = get(obj.markers(i), 'YData');
+                        set(obj.markers(i), 'XData', [x x(end)+1], 'YData', [y result]);
+                    end
                 end
             end
         end

@@ -28,15 +28,41 @@ classdef (Abstract) SquirrelLabAutoRCProtocol < squirrellab.protocols.SquirrelLa
             if obj.autoRC
                 obj.runRC = true;
                 % Open RC figure
-                obj.showFigure('squirrellab.figures.RCFigure', obj.rig.getDevice(obj.amp));
+                obj.showFigure('squirrellab.figures.CustomFigure', @obj.updateFigure);
             else
                 obj.runRC = false;
             end
         end
         
-        %%%%%%% Need to handle RCFigure as custom figure with its own
-        %%%%%%% updateFigure call and make it not update with the rest of
-        %%%%%%% the figures
+        function updateFigure(obj, custFigObj, epoch)
+            if obj.numEpochsCompleted == 0 && obj.RCEpochsCompleted == 1
+                disp('init')
+                obj.plotData.figure = custFigObj.getFigureHandle();
+                % make figure current
+                % figure(figHand);
+                % add axes
+                obj.plotData.axes = axes('Parent', obj.plotData.figure, 'NextPlot', 'replace');
+                
+                
+                % plot three lines of zero
+                totPts = obj.getRCTotalPts();
+                timePts = (1:totPts) / obj.sampleRate;
+                obj.plotData.lines = cell(1,1);
+                colors = [0 0 0];
+                obj.plotData.lines = plot(obj.plotData.axes, ...
+                    timePts, zeros(1,totPts), ...
+                    'Color', colors, 'LineWidth', 2);
+                obj.plotData.lines.UserData = 0;
+            end
+            if epoch.parameters.isKey('RCepoch')
+                if epoch.parameters('RCepoch')
+                    % update the line
+                    obj.plotData.lines.YData = epoch.getResponse(obj.rig.getDevice(obj.amp)).getData();
+                end
+            end
+        end
+        
+        
         function prepareEpoch(obj, epoch)
 %           prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             % add remperature controller monitor
