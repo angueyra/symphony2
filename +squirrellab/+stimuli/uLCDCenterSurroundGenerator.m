@@ -11,6 +11,7 @@ classdef uLCDCenterSurroundGenerator < squirrellab.stimuli.uLCDStimulus
         centerY
         spotFlag = 1;
         ringFlag = 1;
+        clearFlag = 1;
     end
     
     methods

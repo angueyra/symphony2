@@ -1,7 +1,10 @@
 function spotFlag = uLCDCenterSurroundController(state)
     global u
     uStim=state.handles{1};
-    if state.time >= uStim.preTime && state.time < (uStim.preTime+uStim.ringdelayTime) && uStim.spotFlag
+    if state.time< uStim.preTime && uStim.clearFlag
+        u.clear;
+        uStim.clearFlag=0;
+    elseif state.time >= uStim.preTime && state.time < (uStim.preTime+uStim.ringdelayTime) && uStim.spotFlag
         u.spot_white(uStim.centerX,uStim.centerY,uStim.spotDiameter);
         uStim.spotFlag=0;
     elseif state.time >= uStim.preTime+uStim.ringdelayTime && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimTime) && uStim.ringFlag
