@@ -1,4 +1,4 @@
-classdef iledPulse< squirrellab.protocols.SquirrelLabProtocol
+classdef iLEDPulse< squirrellab.protocols.SquirrelLabProtocol
     % LED pulse while doing 2P imaging and not using electrophysiology
     % amplififer
     % Will still collect frame timing and temperature
