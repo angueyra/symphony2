@@ -1,28 +1,44 @@
-classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
+classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
         led                             % Output LED
         ulcd                            % uLCD screen
-        centerX = 114                   % Spot x center (pixels)
-        centerY = 114                   % Spot y center (pixels)
-        preTime = 500                   % Spot leading duration (ms)
-        stimTime = 1000                 % Spot duration (ms)
+        preTime = 200                   % Spot leading duration (ms)
+        stimTime = 100                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
-        ringdelayTime = 250             % Ring leading duration (ms)
-        ringstimTime = 500              % Ring duration (ms)
+        
         spotDiameter = 3               % Spot diameter size (pixels)
-        ringDiameter = 20              % Spot diameter size (pixels)
+        
+        startX = 107                   % Spot x center (pixels)
+        startY = 106                   % Spot y center (pixels)
+        
+        deltaX = 4                   % Spot x center (pixels)
+        deltaY = 4                   % Spot y center (pixels)
+        
+        nX = 5                   % Spot x center (pixels)
+        nY = 5                   % Spot y center (pixels)
+        
         ledAmplitude = 8
         ledMean = 0
+        
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
+        
+        randomOrder = false
     end
     
     properties (Hidden)
         ampType
         ledType
         ulcdType
+        currentX
+        currentY
+        sequenceX
+        sequenceY
+        gridPatternX
+        gridPatternY
+        nTotal
     end
     
     methods
@@ -49,6 +65,19 @@ classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
+            
+            obj.gridPatternX = repmat(0:obj.nX-1,1,obj.nY);
+            obj.gridPatternY = sort(repmat(0:obj.nY-1,1,obj.nX));
+            obj.sequenceX = obj.startX + (obj.gridPatternX .* obj.deltaX);
+            obj.sequenceY = obj.startY + (obj.gridPatternY .* obj.deltaY);
+            obj.nTotal = obj.nX * obj.nY;
+            
+            if obj.randomOrder
+               randOrder = randsample(obj.nTotal, obj.nTotal);
+               obj.sequenceX = obj.sequenceX(randOrder);
+               obj.sequenceY = obj.sequenceY(randOrder);
+            end
+            
         end
         
         function stim = createLedStimulus(obj)
@@ -67,46 +96,32 @@ classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
         
         
         function p = createPresentation(obj)
-%             device = obj.rig.getDevice('Stage');
-% %             canvasSize = device.getCanvasSize();
-%             uLCD = obj.rig.getDevice('uLCD');
+%           canvasSize = obj.rig.getDevice('Stage').getCanvasSize();
+%           uLCD = obj.rig.getDevice('uLCD');
             p = stage.core.Presentation((obj.preTime + obj.stimTime + obj.tailTime) * 1e-3);
             p.setBackgroundColor(0);
             
-            uStim=squirrellab.stimuli.uLCDCenterSurroundGenerator();
-            uStim.centerX=obj.centerX;
-            uStim.centerY=obj.centerY;
+            uStim=squirrellab.stimuli.uLCDMaskSpotGenerator();
             uStim.preTime=obj.preTime*1e-3;
             uStim.stimTime=obj.stimTime*1e-3;
-            uStim.tailTime=obj.tailTime*1e-3;
-            uStim.ringdelayTime=obj.ringdelayTime*1e-3;
-            uStim.ringstimTime=obj.ringstimTime*1e-3;
+            uStim.tailTime=obj.tailTime*1e-3;          
             uStim.spotDiameter=obj.spotDiameter;
-            uStim.ringDiameter=obj.ringDiameter;
+            uStim.centerX=obj.currentX;
+            uStim.centerY=obj.currentY;
             p.addStimulus(uStim);
             
-            uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDCenterSurroundController(state));
+            uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDGridSpotController(state));
             p.addController(uLCDCMD);
             
             center = stage.builtin.stimuli.Ellipse();
             center.color = 1;
             center.radiusX = obj.spotDiameter;
             center.radiusY = obj.spotDiameter;
-            center.position = [obj.centerX, obj.centerY];
+            center.position = [uStim.centerX, uStim.centerY];
             p.addStimulus(center);        
             centerVisible = stage.builtin.controllers.PropertyController(center, 'visible',...
-                @(state)state.time >= uStim.preTime && state.time < (uStim.preTime + uStim.stimTime));
-            p.addController(centerVisible);
-            
-            surround = stage.builtin.stimuli.Ellipse();
-            surround.color = 1;
-            surround.radiusX = obj.ringDiameter;
-            surround.radiusY = obj.ringDiameter;
-            surround.position = [obj.centerX, obj.centerY];
-            p.addStimulus(surround);
-            surroundVisible = stage.builtin.controllers.PropertyController(surround, 'visible',...
-                @(state)state.time >= (uStim.preTime+uStim.ringdelayTime) && state.time < (uStim.preTime+uStim.ringdelayTime+uStim.ringstimTime));
-            p.addController(surroundVisible);
+                @(state)state.time > uStim.preTime && state.time <= (uStim.preTime + uStim.stimTime));
+            p.addController(centerVisible);  
         end
         
         function prepareEpoch(obj, epoch)
@@ -117,6 +132,13 @@ classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
             epoch.addDirectCurrentStimulus(device, device.background, duration, obj.sampleRate);
             epoch.addResponse(device);
             epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
+            
+            index = mod(obj.numEpochsCompleted, length(obj.sequenceX))+1;
+            obj.currentX = obj.sequenceX(index);
+            obj.currentY = obj.sequenceY(index);
+            
+            epoch.addParameter('currentX',obj.currentX);
+            epoch.addParameter('currentY',obj.currentX);
         end
         
         function prepareInterval(obj, interval)
@@ -127,11 +149,11 @@ classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
         end
         
         function tf = shouldContinuePreparingEpochs(obj)
-            tf = obj.numEpochsPrepared < obj.numberOfAverages;
+            tf = obj.numEpochsPrepared < obj.numberOfAverages*obj.nTotal;
         end
         
         function tf = shouldContinueRun(obj)
-            tf = obj.numEpochsCompleted < obj.numberOfAverages;
+            tf = obj.numEpochsCompleted < obj.numberOfAverages*obj.nTotal;
         end
         
     end

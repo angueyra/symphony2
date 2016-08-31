@@ -11,9 +11,9 @@ classdef ulcdSpotMask < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
     properties (Hidden)
         ampType
         ulcdType
-        preTime = 10                   % Spot leading duration (ms)
-        stimTime = 10                 % Spot duration (ms)
-        tailTime = 10                  % Spot trailing duration (ms)
+        preTime = 20                   % Spot leading duration (ms)
+        stimTime = 20                 % Spot duration (ms)
+        tailTime = 20                  % Spot trailing duration (ms)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
