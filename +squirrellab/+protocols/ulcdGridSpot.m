@@ -133,12 +133,14 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
             epoch.addResponse(device);
             epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
             
-            index = mod(obj.numEpochsCompleted, length(obj.sequenceX))+1;
+            index = mod(obj.numEpochsPrepared, length(obj.sequenceX))+1;
             obj.currentX = obj.sequenceX(index);
             obj.currentY = obj.sequenceY(index);
             
             epoch.addParameter('currentX',obj.currentX);
             epoch.addParameter('currentY',obj.currentX);
+            fprintf('nComp=%g, X=%g, Y=%g\n',obj.numEpochsPrepared,...
+                obj.currentX,obj.currentY)
         end
         
         function prepareInterval(obj, interval)
