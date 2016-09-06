@@ -3,8 +3,8 @@ classdef uLCDMaskSpotGenerator < squirrellab.stimuli.uLCDStimulus
         preTime             % Spot leading duration (ms)
         stimTime            % Spot duration (ms)
         tailTime            % Spot trailing duration (ms)
-        spotDiameter        % Spot diameter size (pixels)
-        ringDiameter        % Spot diameter size (pixels)
+        spotRadius          % Spot radius size (pixels)
+        ringRadius          % Spot radius size (pixels)
         centerX             % Spot x center (pixels)
         centerY             % Spot x center (pixels)
         spotFlag = 1;

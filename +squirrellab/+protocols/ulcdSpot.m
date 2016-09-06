@@ -8,7 +8,7 @@ classdef ulcdSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.github.st
         preTime = 500                   % Spot leading duration (ms)
         stimTime = 1000                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
-        spotDiameter = 5                % Spot diameter size (pixels)
+        spotRadius = 5                % Spot radius size (pixels)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
@@ -56,7 +56,7 @@ classdef ulcdSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.github.st
             uStim.preTime=obj.preTime*1e-3;
             uStim.stimTime=obj.stimTime*1e-3;
             uStim.tailTime=obj.tailTime*1e-3;           
-            uStim.spotDiameter=obj.spotDiameter;
+            uStim.spotRadius=obj.spotRadius;
             p.addStimulus(uStim);
             
             uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDSpotController(state));
@@ -64,8 +64,8 @@ classdef ulcdSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.github.st
             
             center = stage.builtin.stimuli.Ellipse();
             center.color = 1;
-            center.radiusX = obj.spotDiameter;
-            center.radiusY = obj.spotDiameter;
+            center.radiusX = obj.spotRadius;
+            center.radiusY = obj.spotRadius;
             center.position = [obj.centerX, obj.centerY];
             p.addStimulus(center);        
             centerVisible = stage.builtin.controllers.PropertyController(center, 'visible',...

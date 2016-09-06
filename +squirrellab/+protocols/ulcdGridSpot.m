@@ -8,7 +8,7 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         stimTime = 100                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
         
-        spotDiameter = 3               % Spot diameter size (pixels)
+        spotRadius = 3               % Spot radius size (pixels)
         
         startX = 107                   % Spot x center (pixels)
         startY = 106                   % Spot y center (pixels)
@@ -105,7 +105,7 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
             uStim.preTime=obj.preTime*1e-3;
             uStim.stimTime=obj.stimTime*1e-3;
             uStim.tailTime=obj.tailTime*1e-3;          
-            uStim.spotDiameter=obj.spotDiameter;
+            uStim.spotRadius=obj.spotRadius;
             uStim.centerX=obj.currentX;
             uStim.centerY=obj.currentY;
             p.addStimulus(uStim);
@@ -115,8 +115,8 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
             
             center = stage.builtin.stimuli.Ellipse();
             center.color = 1;
-            center.radiusX = obj.spotDiameter;
-            center.radiusY = obj.spotDiameter;
+            center.radiusX = obj.spotRadius;
+            center.radiusY = obj.spotRadius;
             center.position = [uStim.centerX, uStim.centerY];
             p.addStimulus(center);        
             centerVisible = stage.builtin.controllers.PropertyController(center, 'visible',...

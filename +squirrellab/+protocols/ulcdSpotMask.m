@@ -5,15 +5,15 @@ classdef ulcdSpotMask < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         ulcd                            % uLCD screen
         centerX = 114                   % Spot x center (pixels)
         centerY = 114                   % Spot y center (pixels)
-        spotDiameter = 3               % Spot diameter size (pixels)
+        spotRadius = 3                  % Spot radius size (pixels)
     end
     
     properties (Hidden)
         ampType
         ulcdType
-        preTime = 20                   % Spot leading duration (ms)
-        stimTime = 20                 % Spot duration (ms)
-        tailTime = 20                  % Spot trailing duration (ms)
+        preTime = 20                    % Spot leading duration (ms)
+        stimTime = 20                   % Spot duration (ms)
+        tailTime = 20                   % Spot trailing duration (ms)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
@@ -41,7 +41,7 @@ classdef ulcdSpotMask < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
             uStim.preTime=obj.preTime*1e-3;
             uStim.stimTime=obj.stimTime*1e-3;
             uStim.tailTime=obj.tailTime*1e-3;
-            uStim.spotDiameter=obj.spotDiameter;
+            uStim.spotRadius=obj.spotRadius;
             p.addStimulus(uStim);
             
             uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDMaskSpotController(state));

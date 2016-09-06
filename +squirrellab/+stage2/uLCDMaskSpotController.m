@@ -5,7 +5,7 @@ function spotFlag = uLCDMaskSpotController(state)
         u.clear;
         uStim.clearFlag;
     elseif state.time >= uStim.preTime && uStim.spotFlag
-        u.spot_white(uStim.centerX,uStim.centerY,uStim.spotDiameter);
+        u.spot_white(uStim.centerX,uStim.centerY,uStim.spotRadius);
         uStim.spotFlag=0;
     end
     spotFlag=uStim.spotFlag;

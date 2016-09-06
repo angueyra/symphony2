@@ -1,4 +1,4 @@
-classdef ulcdHCF < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
+classdef uLCDhcf < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
@@ -10,8 +10,8 @@ classdef ulcdHCF < squirrellab.protocols.SquirrelLabStageProtocol %io.github.sta
         tailTime = 500                  % Spot trailing duration (ms)
         ringdelayTime = 250             % Ring leading duration (ms)
         ringstimTime = 500              % Ring duration (ms)
-        spotDiameter = 3               % Spot diameter size (pixels)
-        ringDiameter = 20              % Spot diameter size (pixels)
+        spotRadius = 3               % Spot radius size (pixels)
+        ringRadius = 20              % Spot radius size (pixels)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)
     end
@@ -61,8 +61,8 @@ classdef ulcdHCF < squirrellab.protocols.SquirrelLabStageProtocol %io.github.sta
             uStim.tailTime=obj.tailTime*1e-3;
             uStim.ringdelayTime=obj.ringdelayTime*1e-3;
             uStim.ringstimTime=obj.ringstimTime*1e-3;
-            uStim.spotDiameter=obj.spotDiameter;
-            uStim.ringDiameter=obj.ringDiameter;
+            uStim.spotRadius=obj.spotRadius;
+            uStim.ringRadius=obj.ringRadius;
             p.addStimulus(uStim);
             
             uLCDCMD = stage.builtin.controllers.PropertyController(uStim, 'cmdCount', @(state)squirrellab.stage2.uLCDCenterSurroundController(state));
@@ -70,8 +70,8 @@ classdef ulcdHCF < squirrellab.protocols.SquirrelLabStageProtocol %io.github.sta
             
             center = stage.builtin.stimuli.Ellipse();
             center.color = 1;
-            center.radiusX = obj.spotDiameter;
-            center.radiusY = obj.spotDiameter;
+            center.radiusX = obj.spotRadius;
+            center.radiusY = obj.spotRadius;
             center.position = [obj.centerX, obj.centerY];
             p.addStimulus(center);        
             centerVisible = stage.builtin.controllers.PropertyController(center, 'visible',...
@@ -80,8 +80,8 @@ classdef ulcdHCF < squirrellab.protocols.SquirrelLabStageProtocol %io.github.sta
             
             surround = stage.builtin.stimuli.Ellipse();
             surround.color = 1;
-            surround.radiusX = obj.ringDiameter;
-            surround.radiusY = obj.ringDiameter;
+            surround.radiusX = obj.ringRadius;
+            surround.radiusY = obj.ringRadius;
             surround.position = [obj.centerX, obj.centerY];
             p.addStimulus(surround);
             surroundVisible = stage.builtin.controllers.PropertyController(surround, 'visible',...
