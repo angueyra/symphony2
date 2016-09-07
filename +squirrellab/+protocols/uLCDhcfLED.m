@@ -1,4 +1,4 @@
-classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
+classdef uLCDhcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
     
     properties
         amp                             % Output amplifier
