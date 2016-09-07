@@ -4,13 +4,13 @@ classdef uLCDhcf < squirrellab.protocols.SquirrelLabStageProtocol %io.github.sta
         amp                             % Output amplifier
         ulcd                            % uLCD screen
         centerX = 114                   % Spot x center (pixels)
-        centerY = 114                   % Spot y center (pixels)
+        centerY = 115                   % Spot y center (pixels)
         preTime = 500                   % Spot leading duration (ms)
         stimTime = 1000                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)
         ringdelayTime = 250             % Ring leading duration (ms)
         ringstimTime = 500              % Ring duration (ms)
-        spotRadius = 3               % Spot radius size (pixels)
+        spotRadius = 6               % Spot radius size (pixels)
         ringRadius = 20              % Spot radius size (pixels)
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between spots (s)

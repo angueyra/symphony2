@@ -4,7 +4,7 @@ classdef ulcdSpotMask < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         amp                             % Output amplifier
         ulcd                            % uLCD screen
         centerX = 114                   % Spot x center (pixels)
-        centerY = 114                   % Spot y center (pixels)
+        centerY = 115                   % Spot y center (pixels)
         spotRadius = 3                  % Spot radius size (pixels)
     end
     

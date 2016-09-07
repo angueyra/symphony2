@@ -5,7 +5,7 @@ classdef ulcdHcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
         led                             % Output LED
         ulcd                            % uLCD screen
         centerX = 114                   % Spot x center (pixels)
-        centerY = 114                   % Spot y center (pixels)
+        centerY = 115                   % Spot y center (pixels)
         preTime = 500                   % Spot leading duration (ms)
         stimTime = 1000                 % Spot duration (ms)
         tailTime = 500                  % Spot trailing duration (ms)

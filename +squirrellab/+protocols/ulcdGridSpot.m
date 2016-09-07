@@ -10,8 +10,8 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         
         spotRadius = 3               % Spot radius size (pixels)
         
-        startX = 107                   % Spot x center (pixels)
-        startY = 106                   % Spot y center (pixels)
+        startX = 106                   % Spot x center (pixels)
+        startY = 107                   % Spot y center (pixels)
         
         deltaX = 4                   % Spot x center (pixels)
         deltaY = 4                   % Spot y center (pixels)
@@ -63,9 +63,6 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         function prepareRun(obj)
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
-            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
-            
             obj.gridPatternX = repmat(0:obj.nX-1,1,obj.nY);
             obj.gridPatternY = sort(repmat(0:obj.nY-1,1,obj.nX));
             obj.sequenceX = obj.startX + (obj.gridPatternX .* obj.deltaX);
@@ -78,6 +75,16 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
                obj.sequenceY = obj.sequenceY(randOrder);
             end
             
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
+            obj.showFigure('squirrellab.figures.uLCDgridspotFigure', obj.rig.getDevice(obj.amp),...
+                'prepts',obj.timeToPts(obj.preTime),...
+                'stmpts',obj.timeToPts(obj.stimTime),...
+                'delaypts',obj.timeToPts(50/1000),...
+                'spotRadius',obj.spotRadius,...
+                'sequenceX',obj.sequenceX,...
+                'sequenceY',obj.sequenceY,...
+                'nTrials',obj.nTotal);
         end
         
         function stim = createLedStimulus(obj)
@@ -133,12 +140,12 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
             epoch.addResponse(device);
             epoch.addStimulus(obj.rig.getDevice(obj.led), obj.createLedStimulus());
             
-            index = mod(obj.numEpochsPrepared, length(obj.sequenceX))+1;
+            index = mod(obj.numEpochsCompleted, length(obj.sequenceX))+1;
             obj.currentX = obj.sequenceX(index);
             obj.currentY = obj.sequenceY(index);
             
             epoch.addParameter('currentX',obj.currentX);
-            epoch.addParameter('currentY',obj.currentX);
+            epoch.addParameter('currentY',obj.currentY);
             fprintf('nComp=%g, X=%g, Y=%g\n',obj.numEpochsPrepared,...
                 obj.currentX,obj.currentY)
         end

@@ -1,6 +1,7 @@
-
 classdef uLCDObj < handle
-    
+    %uLCD is rotated -90 degrees in rigA so that x and y are swapped
+    %Commands are therefore swapped (e.g. spot(x,y) actually sends command
+    %for circle(y,x)
     properties %(Access = private, Transient)
         serialPort
     end
@@ -59,6 +60,8 @@ classdef uLCDObj < handle
             % spot(obj,centerX,centerY,radius,hexcolor1,hexcolor2)
             % radius in pixels, color in hexadecimal format
             % default color is white
+            % remember that in rigA, uLCD is mounted at -90 degrees so code
+            % swaps X and Y in sent commands
             if isempty(hexcolor1)
                 hexcolor1=255;
             end
@@ -69,8 +72,8 @@ classdef uLCDObj < handle
             centerY(centerY>220)=220/2;
             % Outer circle
             fwrite(obj.serialPort,[255,119]);
-            fwrite(obj.serialPort,[00,centerX]);
             fwrite(obj.serialPort,[00,centerY]);
+            fwrite(obj.serialPort,[00,centerX]);
             fwrite(obj.serialPort,[00,radius]);
             fwrite(obj.serialPort,[hexcolor1,hexcolor2]);
             %msg=fread(obj.serialPort,1);
