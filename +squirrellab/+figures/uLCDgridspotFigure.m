@@ -70,16 +70,15 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
             ylabel(obj.axesHandle, 'y-direction (pixels)');
             title(obj.axesHandle,'Receptive Field');
             
-            obj.coneCenter = util.drawCircle(114,115,1,obj.axesHandle);
-            set(obj.coneCenter,'Color','k','linewidth',2);
-            
-            obj.realCone = util.drawCircle(114,115,1,obj.axesHandle);
-            set(obj.realCone,'Color','r','linewidth',2);
-            
             for i=1:obj.nTrials
                 obj.spots(i)=util.drawCircle(obj.sequenceX(i),obj.sequenceY(i),obj.spotRadius,obj.axesHandle);
             end
             
+            obj.coneCenter = util.drawCircle(114,115,1,obj.axesHandle);
+            set(obj.coneCenter,'Color','k','linewidth',3);
+            
+            obj.realCone = util.drawCircle(114,115,1,obj.axesHandle);
+            set(obj.realCone,'Color','r','linewidth',3);
         end
 
         function setTitle(obj, t)
@@ -117,9 +116,6 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
             if obj.currTrial==0
                 obj.currTrial=obj.nTrials;
             end
-            if obj.currTrial==1
-                
-            end
             obj.Charge(obj.currTrial) = currentCharge;
             obj.responseX(obj.currTrial) = currentX;
             obj.responseY(obj.currTrial) = currentY;
@@ -128,14 +124,19 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
             currColor=NaN(obj.nTrials,1);
             for i=1:obj.nTrials
                 currColor(i)=round(1000*(((obj.Charge(i)+abs(min(obj.Charge))))/max((obj.Charge+abs(min(obj.Charge))))))+1;
-                set(obj.spots(i),'Color',colors(currColor(i),:))
+                set(obj.spots(i),'Color',colors(currColor(i),:),'linewidth',2);
             end
+            set(obj.spots(obj.currTrial),'linewidth',2);
             
             rfx=sum(obj.sequenceX.*obj.Charge)/sum(obj.Charge);
             rfy=sum(obj.sequenceY.*obj.Charge)/sum(obj.Charge);
             
             [realConeX,realConeY]=util.drawCircleXY(rfx,rfy,1);
             set(obj.realCone,'XData',realConeX,'YData',realConeY);
+            
+            if obj.currTrial==obj.nTrials
+                fprintf('Extimated RF center:\n\tX = %g\n\tY=%g\n',rfx,rfy);
+            end
         end
         
     end 
