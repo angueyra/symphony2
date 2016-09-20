@@ -1,4 +1,4 @@
-classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
+classdef uLCDgridRFFigure < symphonyui.core.FigureHandler
     
     properties (SetAccess = private)
         ampDevice
@@ -25,7 +25,7 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
     
     methods
         
-        function obj = uLCDgridspotFigure(ampDevice, varargin)
+        function obj = uLCDgridRFFigure(ampDevice, varargin)
             obj.ampDevice = ampDevice;            
             ip = inputParser();
             ip.addParameter('prepts', [], @(x)isvector(x));
@@ -74,10 +74,10 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
                 obj.spots(i)=util.drawCircle(obj.sequenceX(i),obj.sequenceY(i),obj.spotRadius,obj.axesHandle);
             end
             
-            obj.coneCenter = util.drawCircle(114,115,1,obj.axesHandle);
+            obj.coneCenter = util.drawCircle(114,118,1,obj.axesHandle);
             set(obj.coneCenter,'Color','k','linewidth',3);
             
-            obj.realCone = util.drawCircle(114,115,1,obj.axesHandle);
+            obj.realCone = util.drawCircle(114,118,1,obj.axesHandle);
             set(obj.realCone,'Color','r','linewidth',3);
         end
 
@@ -88,7 +88,9 @@ classdef uLCDgridspotFigure < symphonyui.core.FigureHandler
 
         function clear(obj)
             cla(obj.axesHandle);
+            clf(obj.figureHandle);
             obj.spots = [];
+            obj.createUi;
         end
         
         function handleEpoch(obj, epoch)

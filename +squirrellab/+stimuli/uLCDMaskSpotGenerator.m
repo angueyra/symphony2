@@ -9,6 +9,7 @@ classdef uLCDMaskSpotGenerator < squirrellab.stimuli.uLCDStimulus
         centerY             % Spot x center (pixels)
         spotFlag = 1;
         clearFlag = 1;
+        initialclearFlag=1;
     end
     
     methods

@@ -1,4 +1,8 @@
 classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.github.stage_vss.protocols.StageProtocol
+    % Creates an led pulsecombined with a uLCD spots laid on a grid.
+    % Grid's origin at startX and startY
+    % Spot is created during preTime, cleared during tailTime
+    % Default values create a 3 x 3 grid with perfectly adjacent spots
     
     properties
         amp                             % Output amplifier
@@ -10,11 +14,11 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         
         spotRadius = 3               % Spot radius size (pixels)
         
-        startX = 106                   % Spot x center (pixels)
-        startY = 107                   % Spot y center (pixels)
+        startX = 114                   % Spot x center (pixels)
+        startY = 118                   % Spot y center (pixels)
         
-        deltaX = 4                   % Spot x center (pixels)
-        deltaY = 4                   % Spot y center (pixels)
+        deltaX = 6                   % Spot x center (pixels)
+        deltaY = 6                   % Spot y center (pixels)
         
         nX = 5                   % Spot x center (pixels)
         nY = 5                   % Spot y center (pixels)
@@ -38,6 +42,7 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         sequenceY
         gridPatternX
         gridPatternY
+        randOrder
         nTotal
     end
     
@@ -63,21 +68,32 @@ classdef ulcdGridSpot < squirrellab.protocols.SquirrelLabStageProtocol %io.githu
         function prepareRun(obj)
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
-            obj.gridPatternX = repmat(0:obj.nX-1,1,obj.nY);
-            obj.gridPatternY = sort(repmat(0:obj.nY-1,1,obj.nX));
+            obj.gridPatternX = repmat(-(obj.nX-1)/2:(obj.nX-1)/2,1,obj.nY);
+            obj.gridPatternY = sort(repmat(-(obj.nY-1)/2:(obj.nY-1)/2,1,obj.nX));
             obj.sequenceX = obj.startX + (obj.gridPatternX .* obj.deltaX);
             obj.sequenceY = obj.startY + (obj.gridPatternY .* obj.deltaY);
             obj.nTotal = obj.nX * obj.nY;
             
             if obj.randomOrder
-               randOrder = randsample(obj.nTotal, obj.nTotal);
-               obj.sequenceX = obj.sequenceX(randOrder);
-               obj.sequenceY = obj.sequenceY(randOrder);
+               obj.randOrder = randsample(obj.nTotal, obj.nTotal);
+               obj.sequenceX = obj.sequenceX(obj.randOrder);
+               obj.sequenceY = obj.sequenceY(obj.randOrder);
+            else
+                obj.randOrder=1:obj.nTotal;
             end
             
-            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
-            obj.showFigure('squirrellab.figures.uLCDgridspotFigure', obj.rig.getDevice(obj.amp),...
+%             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.uLCDGridResponseFigure', obj.rig.getDevice(obj.amp),...
+                'prepts',obj.timeToPts(obj.preTime),...
+                'stmpts',obj.timeToPts(obj.stimTime),...
+                'datapts',obj.timeToPts(obj.preTime+obj.stimTime+obj.tailTime),...
+                'gridPatternX',obj.gridPatternX,...
+                'gridPatternY',obj.gridPatternY,...
+                'randOrder',obj.randOrder,...
+                'nX',obj.nX,...
+                'nY',obj.nY,...
+                'nTrials',obj.nTotal);
+            obj.showFigure('squirrellab.figures.uLCDgridRFFigure', obj.rig.getDevice(obj.amp),...
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
                 'delaypts',obj.timeToPts(50/1000),...

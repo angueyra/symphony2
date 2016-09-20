@@ -5,10 +5,10 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         preTime = 50                    % Pulse leading duration (ms)
         stimTime = 500                  % Pulse duration (ms)
         tailTime = 50                   % Pulse trailing duration (ms)
-        firstPulseSignal = 100          % First pulse signal value (mV or pA)
+        firstPulseSignal = -100          % First pulse signal value (mV or pA)
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
-        pulsesInFamily = uint16(11)     % Number of pulses in family
-        numberOfAverages = uint16(5)    % Number of families
+        pulsesInFamily = uint16(15)     % Number of pulses in family
+        numberOfAverages = uint16(3)    % Number of families
         interpulseInterval = 0          % Duration between pulses (s)
     end
     
@@ -37,8 +37,15 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
+            pulseAmp =  ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal;
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
+%             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
+%                 'groupBy', {'pulseSignal'});
+            obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
+                'prepts',obj.timeToPts(obj.preTime),...
+                'stmpts',obj.timeToPts(obj.stimTime),...
+                'nPulses',double(obj.pulsesInFamily),...
+                'pulseAmp',pulseAmp,...
                 'groupBy', {'pulseSignal'});
             obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
