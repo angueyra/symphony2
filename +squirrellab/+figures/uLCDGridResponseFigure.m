@@ -55,8 +55,8 @@ classdef uLCDGridResponseFigure < symphonyui.core.FigureHandler
         function createUi(obj)
             import appbox.*;
             
-%             obj.axH=gobjects(obj.nTrials);
-%             obj.rH=gobjects(obj.nTrials);
+            obj.axH=gobjects(obj.nTrials);
+            obj.rH=gobjects(obj.nTrials);
             
             obj.currTrial = 0;
             obj.minResponse = 0;
@@ -83,13 +83,6 @@ classdef uLCDGridResponseFigure < symphonyui.core.FigureHandler
                     obj.rH(cnt)=line(pretAx,zeros(size(pretAx)),'Parent',obj.axH(cnt));
                 end
             end
-            
-            
-%             xlabel(obj.axesHandle, 'x-direction (pixels)');
-%             ylabel(obj.axesHandle, 'y-direction (pixels)');
-            
-
-            
         end
 
         function setTitle(obj, t)
@@ -98,9 +91,8 @@ classdef uLCDGridResponseFigure < symphonyui.core.FigureHandler
         end
 
         function clear(obj)
-            obj.currTrial = 0;
-            obj.minResponse = 0;
-            obj.maxResponse = 0;
+            clf(obj.figureHandle)
+            obj.createUi;
         end
         
         function handleEpoch(obj, epoch)
