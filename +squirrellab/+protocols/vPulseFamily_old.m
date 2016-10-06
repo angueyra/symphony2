@@ -1,14 +1,12 @@
-classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
+classdef vPulseFamily_old < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         amp                             % Output amplifier
-        preTime = 100                   % Pulse leading duration (ms)
+        preTime = 50                    % Pulse leading duration (ms)
         stimTime = 500                  % Pulse duration (ms)
-        tailTime = 2000                 % Pulse trailing duration (ms)
-        firstPulseSignal = -100         % First pulse signal value (mV or pA)
+        tailTime = 50                   % Pulse trailing duration (ms)
+        firstPulseSignal = -100          % First pulse signal value (mV or pA)
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
-        leakSub = true                  % Attempt leak subtraction with 5mV pulses
-        leakN = uint(2)                 % Number of pairs of low voltage stimuli to run for leak subtraction
         pulsesInFamily = uint16(15)     % Number of pulses in family
         numberOfAverages = uint16(3)    % Number of families
         interpulseInterval = 0          % Duration between pulses (s)
@@ -16,10 +14,6 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
     
     properties (Hidden)
         ampType
-        leakPulses
-        nLeakPulses
-        nPulses
-        pulseAmp
     end
     
     methods
@@ -28,16 +22,12 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
             didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
-            obj.leakPulses = repmat([-5 5],1,obj.leakN);
-            obj.nLeakPulses = size(obj.leakPulses,2);
-            obj.nPulses = obj.pulsesInFamily + obj.nLeakPulses;
-            obj.pulseAmp = [obj.leakPulses ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal];
         end
         
         function p = getPreview(obj, panel)
             p = symphonyui.builtin.previews.StimuliPreview(panel, @()createPreviewStimuli(obj));
             function s = createPreviewStimuli(obj)
-                s = cell(1, obj.nPulses);
+                s = cell(1, obj.pulsesInFamily);
                 for i = 1:numel(s)
                     s{i} = obj.createAmpStimulus(i);
                 end
@@ -46,33 +36,24 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
-
+            
+            pulseAmp =  ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal;
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
 %             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
 %                 'groupBy', {'pulseSignal'});
-            if ~obj.leakSub
             obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
                 'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.pulseAmps,...
+                'pulseAmp',pulseAmp,...
                 'groupBy', {'pulseSignal'});
-            else % this should make a leak sub figure (not done yet)
-                obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
-                'prepts',obj.timeToPts(obj.preTime),...
-                'stmpts',obj.timeToPts(obj.stimTime),...
-                'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.pulseAmps,...
-                'groupBy', {'pulseSignal'});
-            end
             obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
         end
         
         function [stim, pulseSignal] = createAmpStimulus(obj, pulseNum)
-            
-            pulseSignal = obj.pulseAmp(pulseNum);
+            pulseSignal = obj.incrementPerPulse * (double(pulseNum) - 1) + obj.firstPulseSignal;
             
             gen = symphonyui.builtin.stimuli.PulseGenerator();
             
@@ -90,7 +71,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function prepareEpoch(obj, epoch)
             prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
-            pulseNum = mod(obj.numEpochsPrepared - 1, obj.nPulses) + 1;
+            pulseNum = mod(obj.numEpochsPrepared - 1, obj.pulsesInFamily) + 1;
             [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
             
             epoch.addParameter('pulseSignal', pulseSignal);
@@ -106,11 +87,11 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function tf = shouldContinuePreparingEpochs(obj)
-            tf = obj.numEpochsPrepared < obj.numberOfAverages * obj.nPulses;
+            tf = obj.numEpochsPrepared < obj.numberOfAverages * obj.pulsesInFamily;
         end
         
         function tf = shouldContinueRun(obj)
-            tf = obj.numEpochsCompleted < obj.numberOfAverages * obj.nPulses;
+            tf = obj.numEpochsCompleted < obj.numberOfAverages * obj.pulsesInFamily;
         end
         
     end
