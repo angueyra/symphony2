@@ -8,7 +8,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         firstPulseSignal = -100         % First pulse signal value (mV or pA)
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
         leakSub = true                  % Attempt leak subtraction with 5mV pulses
-        leakN = uint(2)                 % Number of pairs of low voltage stimuli to run for leak subtraction
+        leakN = uint16(2)                 % Number of pairs of low voltage stimuli to run for leak subtraction
         pulsesInFamily = uint16(15)     % Number of pulses in family
         numberOfAverages = uint16(3)    % Number of families
         interpulseInterval = 0          % Duration between pulses (s)
@@ -26,12 +26,6 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function didSetRig(obj)
             didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
-            
-            [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
-            obj.leakPulses = repmat([-5 5],1,obj.leakN);
-            obj.nLeakPulses = size(obj.leakPulses,2);
-            obj.nPulses = obj.pulsesInFamily + obj.nLeakPulses;
-            obj.pulseAmp = [obj.leakPulses ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal];
         end
         
         function p = getPreview(obj, panel)
@@ -46,6 +40,17 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
+            
+            %% Where is the right spot for this. Needs to update if parameters update
+            % Right now, getPreview does not update untila fter it's run
+            [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
+            obj.leakPulses = repmat([-5 5],1,obj.leakN);
+            obj.nLeakPulses = size(obj.leakPulses,2);
+            obj.nPulses = obj.pulsesInFamily + obj.nLeakPulses;
+%             fprintf('nL = %g\n',obj.nLeakPulses)
+%             fprintf('nP = %g\n',obj.pulsesInFamily)
+            obj.pulseAmp = [obj.leakPulses ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal];
+%             fprintf('PoRDER = %g\n',obj.pulseAmp)
 
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
 %             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
@@ -55,14 +60,14 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
                 'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.pulseAmps,...
+                'pulseAmp',obj.pulseAmp,...
                 'groupBy', {'pulseSignal'});
             else % this should make a leak sub figure (not done yet)
                 obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
                 'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.pulseAmps,...
+                'pulseAmp',obj.pulseAmp,...
                 'groupBy', {'pulseSignal'});
             end
             obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...

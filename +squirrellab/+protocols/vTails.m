@@ -19,7 +19,7 @@ classdef vTails < squirrellab.protocols.SquirrelLabProtocol
     
     properties (Hidden)
         ampType
-        deactAmp = ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.deactPulseSignal;
+        deactAmp
     end
     
     methods
@@ -42,6 +42,8 @@ classdef vTails < squirrellab.protocols.SquirrelLabProtocol
         
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
+            
+            obj.deactAmp = ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.deactPulseSignal;
             
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
 %             obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
