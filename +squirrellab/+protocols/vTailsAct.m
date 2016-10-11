@@ -43,15 +43,11 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabProtocol
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
-                'prepts',obj.timeToPts(obj.preTime),...
-                'stmpts',obj.timeToPts(obj.stimTime),...
-                'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.deactAmp,...
-                'groupBy', {'deactSignal'});
+            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
+                    'groupBy', {'preactSignal'});
             obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
-                'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
+                'measurementRegion', [obj.preTime obj.preTime+obj.preactTime]);
         end
         
         function [stim, preactSignal, preactDelay] = createAmpStimulus(obj, pulseNum)
@@ -70,7 +66,7 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabProtocol
             gen1.stimTime = preactDelay;
             gen1.tailTime = obj.actTime + obj.tailTime + (maxDelay-preactDelay);
             gen1.mean = obj.rig.getDevice(obj.amp).background.quantity;
-            gen1.amplitude = obj.preactAmp(pulseNum) - gen1.mean;
+            gen1.amplitude = preactSignal - gen1.mean;
             gen1.sampleRate = obj.sampleRate;
             gen1.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
@@ -100,9 +96,9 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabProtocol
             pulseNum = mod(obj.numEpochsPrepared - 1, obj.pulsesInFamily) + 1;
             [stim, preactSignal, preactDelay] = obj.createAmpStimulus(pulseNum);
             
-            epoch.addParameter('activationSignal', obj.actSignal);
-            epoch.addParameter('preactivationSignal', preactSignal);
-            epoch.addParameter('preactivationDelay', preactDelay);
+            epoch.addParameter('actSignal', obj.actSignal);
+            epoch.addParameter('preactSignal', preactSignal);
+            epoch.addParameter('preactDelay', preactDelay);
             
             epoch.addStimulus(obj.rig.getDevice(obj.amp), stim);
             epoch.addResponse(obj.rig.getDevice(obj.amp));
