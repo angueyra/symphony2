@@ -4,10 +4,10 @@ classdef vTails < squirrellab.protocols.SquirrelLabProtocol
         amp                             % Output amplifier
         preTime = 100                   % Pulse leading duration (ms)
         stimTime = 500                  % Pulse duration (ms)
-        deactTime = 2000                % Duration of tail current
+        deactTime = 1000                % Duration of tail current
         tailTime = 100                  % Pulse trailing duration (ms)
-        actPulseSignal = 0              % activation Pulse signal value (mV or pA)
-        deactPulseSignal = -100          % deactivation first signal
+        actPulseSignal = -120              % activation Pulse signal value (mV or pA)
+        deactPulseSignal = -110          % deactivation first signal
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
         pulsesInFamily = uint16(15)     % Number of pulses in family
         numberOfAverages = uint16(3)    % Number of families
@@ -61,7 +61,10 @@ classdef vTails < squirrellab.protocols.SquirrelLabProtocol
         
         function [stim, deactSignal] = createAmpStimulus(obj, pulseNum)
 %             pulseSignal = obj.incrementPerPulse * (double(pulseNum) - 1) + obj.firstPulseSignal;
-            deactSignal = obj.deactAmp(pulseNum);
+            
+%             deactSignal = obj.deactAmp(pulseNum);
+            
+            deactSignal =((double(pulseNum)-1) * obj.incrementPerPulse) + obj.deactPulseSignal;
             
             
             gen1 = symphonyui.builtin.stimuli.PulseGenerator();

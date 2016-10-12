@@ -5,10 +5,10 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         preTime = 100                   % Pulse leading duration (ms)
         stimTime = 500                  % Pulse duration (ms)
         tailTime = 2000                 % Pulse trailing duration (ms)
-        firstPulseSignal = -100         % First pulse signal value (mV or pA)
+        firstPulseSignal = -60          % First pulse signal value (mV or pA)
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
         leakSub = true                  % Attempt leak subtraction with 5mV pulses
-        leakN = uint16(2)                 % Number of pairs of low voltage stimuli to run for leak subtraction
+        leakN = uint16(2)               % Number of pairs of low voltage stimuli to run for leak subtraction
         pulsesInFamily = uint16(15)     % Number of pulses in family
         numberOfAverages = uint16(3)    % Number of families
         interpulseInterval = 0          % Duration between pulses (s)
@@ -16,10 +16,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
     
     properties (Hidden)
         ampType
-        leakPulses
-        nLeakPulses
         nPulses
-        pulseAmp
     end
     
     methods
@@ -27,14 +24,13 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function didSetRig(obj)
             didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
-            obj.leakParsing();
         end
         
         function p = getPreview(obj, panel)
             p = symphonyui.builtin.previews.StimuliPreview(panel, @()createPreviewStimuli(obj));
-            obj.leakParsing();
             function s = createPreviewStimuli(obj)
-                s = cell(1, obj.nPulses);
+                [nPulses, ~] = obj.leakParsing;
+                s = cell(1, nPulses);
                 for i = 1:numel(s)
                     s{i} = obj.createAmpStimulus(i);
                 end
@@ -43,21 +39,16 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
-            obj.leakParsing();
+            [nPulses, pulseAmp] = obj.leakParsing;
+            obj.nPulses = nPulses;
             % Data Figure
             obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
             % Mean Figure + IV
             obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
-                'nPulses',double(obj.nPulses),...
-                'pulseAmp',obj.pulseAmp,...
-                'groupBy', {'pulseSignal'});
-                obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
-                'prepts',obj.timeToPts(obj.preTime),...
-                'stmpts',obj.timeToPts(obj.stimTime),...
-                'nPulses',double(obj.pulsesInFamily),...
-                'pulseAmp',obj.pulseAmp,...
+                'nPulses',double(nPulses),...
+                'pulseAmp',pulseAmp+obj.rig.getDevice(obj.amp).background.quantity,...
                 'groupBy', {'pulseSignal'});
             %Baseline and Variance tracking
             obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
@@ -67,7 +58,8 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function [stim, pulseSignal] = createAmpStimulus(obj, pulseNum)
             
-            pulseSignal = obj.pulseAmp(pulseNum);
+            [~, pulseAmp] = obj.leakParsing;
+            pulseSignal = pulseAmp(pulseNum);
             
             gen = symphonyui.builtin.stimuli.PulseGenerator();
             
@@ -75,7 +67,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
             gen.stimTime = obj.stimTime;
             gen.tailTime = obj.tailTime;
             gen.mean = obj.rig.getDevice(obj.amp).background.quantity;
-            gen.amplitude = pulseSignal - gen.mean;
+            gen.amplitude = pulseSignal;
             gen.sampleRate = obj.sampleRate;
             gen.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
@@ -85,7 +77,9 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function prepareEpoch(obj, epoch)
             prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
-            pulseNum = mod(obj.numEpochsPrepared - 1, obj.nPulses) + 1;
+            [nPulses, ~] = obj.leakParsing;
+            
+            pulseNum = mod(obj.numEpochsPrepared - 1, nPulses) + 1;
             [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
             
             epoch.addParameter('pulseSignal', pulseSignal);
@@ -108,16 +102,16 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
             tf = obj.numEpochsCompleted < obj.numberOfAverages * obj.nPulses;
         end
         
-        function obj = leakParsing(obj)    
+        function [nPulses, pulseAmp] = leakParsing(obj)    
             if obj.leakSub
-                obj.leakPulses = repmat([-5 5],1,obj.leakN);
-                obj.nLeakPulses = size(obj.leakPulses,2);
+                leakPulses = repmat([-5 5],1,obj.leakN);
+                nLeakPulses = size(leakPulses,2);
             else
-                obj.leakPulses = [];
-                obj.nLeakPulses = 0;
+                leakPulses = [];
+                nLeakPulses = 0;
             end
-            obj.nPulses = obj.pulsesInFamily + obj.nLeakPulses;
-            obj.pulseAmp = [obj.leakPulses ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal]; 
+            nPulses = obj.pulsesInFamily + nLeakPulses;
+            pulseAmp = [leakPulses ((0:double(obj.pulsesInFamily)-1) * obj.incrementPerPulse) + obj.firstPulseSignal]; 
         end
     end
     

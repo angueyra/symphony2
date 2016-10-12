@@ -43,7 +43,12 @@ classdef vPulseFamilyIVFigure < symphonyui.core.FigureHandler
             obj.pulseResp = zeros(size(obj.pulseAmp));
             
             obj.groupBy = ip.Results.groupBy;
+            
             obj.sweepColors = util.pmkmp(obj.nPulses);
+            
+            [~,pulseOrder]=sort(obj.pulseAmp);
+            obj.sweepColors = obj.sweepColors(pulseOrder,:);
+            
             obj.storedSweepColor = ip.Results.storedSweepColor;
             
             obj.currPulseIndex = 0;
@@ -53,7 +58,7 @@ classdef vPulseFamilyIVFigure < symphonyui.core.FigureHandler
             stored = obj.storedSweeps();
             for i = 1:numel(stored)
                 stored{i}.line = line(stored{i}.x, stored{i}.y, ...
-                    'Parent', obj.axesHandle, ...
+                    'Parent', obj.axH(1), ...
                     'Color', obj.storedSweepColor, ...
                     'HandleVisibility', 'off');
             end
