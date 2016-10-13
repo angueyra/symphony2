@@ -50,13 +50,13 @@ classdef vNoise < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function didSetRig(obj)
-            didSetRig@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
         
         function d = getPropertyDescriptor(obj, name)
-            d = getPropertyDescriptor@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, name);
+            d = getPropertyDescriptor@squirrellab.protocols.SquirrelLabProtocol(obj, name);
             
             if strncmp(name, 'amp2', 4) && numel(obj.rig.getDeviceNames('Amp')) < 2
                 d.isHidden = true;
@@ -79,13 +79,15 @@ classdef vNoise < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@edu.washington.riekelab.protocols.RiekeLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             if numel(obj.rig.getDeviceNames('Amp')) < 2
                 obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
-                obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
+                obj.showFigure('squirrellab.figures.ProgressFigure', obj.numberOfAverages * obj.pulsesInFamily);
+                obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp), ...
+                    'prePts', obj.timeToPts(obj.preTime), ...
                     'groupBy', {'stdv'});
-                obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
+                obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
                     'baselineRegion', [0 obj.preTime], ...
                     'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
             else
@@ -123,7 +125,7 @@ classdef vNoise < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
             persistent seed;
             if ~obj.useRandomSeed
@@ -146,7 +148,7 @@ classdef vNoise < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@edu.washington.riekelab.protocols.RiekeLabProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

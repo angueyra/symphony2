@@ -68,7 +68,7 @@ classdef vRamp < squirrellab.protocols.SquirrelLabProtocol
             g3.stimTime = obj.tailTime;
             g3.tailTime = 0;
             g3.amplitude = obj.rig.getDevice(obj.amp).background.quantity-obj.rampStart;
-            g3.mean = obj.rampStart;
+            g3.mean = 0;
             g3.sampleRate = obj.sampleRate;
             g3.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
