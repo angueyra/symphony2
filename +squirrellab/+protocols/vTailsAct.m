@@ -94,7 +94,7 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabProtocol
             prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
             pulseNum = mod(obj.numEpochsPrepared - 1, obj.pulsesInFamily) + 1;
-            [stim, preactSignal, preactDelay] = obj.createAmpStimulus(pulseNum);
+            [stim, preactSignal, preactDelay] = obj.createAmpStimulus(pulseNum); %#ok<*PROPLC>
             
             epoch.addParameter('actSignal', obj.actSignal);
             epoch.addParameter('preactSignal', preactSignal);

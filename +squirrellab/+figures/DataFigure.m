@@ -10,14 +10,13 @@ classdef DataFigure < symphonyui.core.FigureHandler
     properties (Access = private)
         axesHandle
         sweep
-        storedSweep
     end
 
     methods
 
         function obj = DataFigure(device, varargin)
             co = get(groot, 'defaultAxesColorOrder');
-            
+
             ip = inputParser();
             ip.addParameter('sweepColor', co(1,:), @(x)ischar(x) || isvector(x));
             ip.addParameter('storedSweepColor', 'r', @(x)ischar(x) || isvector(x));
@@ -28,6 +27,15 @@ classdef DataFigure < symphonyui.core.FigureHandler
             obj.storedSweepColor = ip.Results.storedSweepColor;
 
             obj.createUi();
+            
+            stored = obj.storedSweep();
+            if ~isempty(stored)
+                stored.line = line(stored.x, stored.y, ...
+                    'Parent', obj.axesHandle, ...
+                    'Color', obj.storedSweepColor, ...
+                    'HandleVisibility', 'off');
+            end
+            obj.storedSweep(stored);
         end
 
         function createUi(obj)
@@ -41,10 +49,14 @@ classdef DataFigure < symphonyui.core.FigureHandler
                 'ClickedCallback', @obj.onSelectedStoreSweep);
             setIconImage(storeSweepButton, symphonyui.app.App.getResource('icons', 'sweep_store.png'));
 
+            clearSweepsButton = uipushtool( ...
+                'Parent', toolbar, ...
+                'TooltipString', 'Clear Sweep', ...
+                'ClickedCallback', @obj.onSelectedClearSweep);
+            setIconImage(clearSweepsButton, symphonyui.app.App.getResource('icons', 'sweep_clear.png'));
+            
             obj.axesHandle = axes( ...
                 'Parent', obj.figureHandle, ...
-                'FontName', get(obj.figureHandle, 'DefaultUicontrolFontName'), ...
-                'FontSize', get(obj.figureHandle, 'DefaultUicontrolFontSize'), ...
                 'XTickMode', 'auto');
             xlabel(obj.axesHandle, 'sec');
 
@@ -76,9 +88,13 @@ classdef DataFigure < symphonyui.core.FigureHandler
                     y = [];
                 end
                 if isempty(obj.sweep)
-                    obj.sweep = line(x, y, 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
+                    obj.sweep.x = x;
+                    obj.sweep.y = y;
+                    obj.sweep.line = line(obj.sweep.x, obj.sweep.y, 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
                 else
-                    set(obj.sweep, 'XData', x, 'YData', y);
+                    obj.sweep.x = x;
+                    obj.sweep.y = y;
+                    set(obj.sweep.line, 'XData', obj.sweep.x, 'YData', obj.sweep.y);
                 end
                 ylabel(obj.axesHandle, units, 'Interpreter', 'none');
             end
@@ -89,13 +105,47 @@ classdef DataFigure < symphonyui.core.FigureHandler
     methods (Access = private)
 
         function onSelectedStoreSweep(obj, ~, ~)
-            if ~isempty(obj.storedSweep)
-                delete(obj.storedSweep);
+            obj.storeSweep();
+        end
+        
+        function storeSweep(obj)
+            obj.clearSweep();
+            
+            store = obj.sweep;
+            if ~isempty(store)
+                store.line = copyobj(obj.sweep.line, obj.axesHandle);
+                set(store.line, ...
+                    'Color', obj.storedSweepColor, ...
+                    'HandleVisibility', 'off');
             end
-            obj.storedSweep = copyobj(obj.sweep, obj.axesHandle);
-            set(obj.storedSweep, ...
-                'Color', obj.storedSweepColor, ...
-                'HandleVisibility', 'off');
+            obj.storedSweep(store);
+        end
+        
+        function onSelectedClearSweep(obj, ~, ~)
+            obj.clearSweep();
+        end
+        
+        function clearSweep(obj)
+            stored = obj.storedSweep();
+            if ~isempty(stored)
+                delete(stored.line);
+            end
+            
+            obj.storedSweep([]);
+        end
+
+    end
+    
+    methods (Static)
+
+        function sweep = storedSweep(sweep)
+            % This method stores a sweep across figure handlers.
+
+            persistent stored;
+            if nargin > 0
+                stored = sweep;
+            end
+            sweep = stored;
         end
 
     end

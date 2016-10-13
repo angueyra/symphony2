@@ -52,11 +52,11 @@ classdef vRamp < squirrellab.protocols.SquirrelLabProtocol
                        
             g2 = symphonyui.builtin.stimuli.PulseGenerator();
             
-            g2.preTime = 0;
-            g2.stimTime = obj.preTime;
-            g2.tailTime = obj.stimTime + obj.tailTime;
-            g2.amplitude = obj.rig.getDevice(obj.amp).background.quantity-obj.rampStart;
-            g2.mean = 0;
+            g2.preTime = obj.preTime;
+            g2.stimTime = obj.stimTime;
+            g2.tailTime = obj.tailTime;
+            g2.amplitude = obj.rampEnd-obj.rampStart;
+            g2.mean = obj.rampStart;
             g2.sampleRate = obj.sampleRate;
             g2.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
@@ -64,21 +64,26 @@ classdef vRamp < squirrellab.protocols.SquirrelLabProtocol
             
             g3 = symphonyui.builtin.stimuli.PulseGenerator();
             
-            g3.preTime = obj.preTime + obj.stimTime;
-            g3.stimTime = obj.tailTime;
+            g3.preTime = 600;
+            g3.stimTime = 100;
             g3.tailTime = 0;
-            g3.amplitude = obj.rig.getDevice(obj.amp).background.quantity-obj.rampStart;
-            g3.mean = obj.rampStart;
-            g3.sampleRate = obj.sampleRate;
-            g3.units = obj.rig.getDevice(obj.amp).background.displayUnits;
+            g3.amplitude = 40;
+            g3.mean = 0;
+            g3.sampleRate = 1000;
+            g3.units = 'V';
             
-            pulse2=g3.generate();
-
+            s3=g3.generate();
+            % lH=lineH([],s2.getData,f1);
+            % lH.line;
+            % lH.color([1 0 0]);
             
             g=symphonyui.builtin.stimuli.SumGenerator();
-            g.stimuli={ramp,pulse1,pulse2};
+            g.stimuli={ramp,pulse1,s3};
             
-            stim=g.generate;
+            s=g.generate;
+            lH=lineH([],s.getData,f1);
+            lH.linemarkers;
+            lH.color([0 0 0]);
         end
         
         function prepareEpoch(obj, epoch)

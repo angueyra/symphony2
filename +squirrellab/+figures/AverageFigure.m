@@ -1,6 +1,6 @@
 classdef AverageFigure < symphonyui.core.FigureHandler
     % Plots the mean response of a specified device for all epochs run.
-    
+
     properties (SetAccess = private)
         device
         groupBy
@@ -8,73 +8,77 @@ classdef AverageFigure < symphonyui.core.FigureHandler
         storedSweepColor
         prePts
     end
-    
+
     properties (Access = private)
         axesHandle
         sweeps
-        sweepIndex
-        storedSweep
     end
-    
+
     methods
-        
-        function obj = AverageFigure(device, prePts,varargin)
+
+        function obj = AverageFigure(device, varargin)
             co = get(groot, 'defaultAxesColorOrder');
-            
+
             ip = inputParser();
             ip.addParameter('groupBy', [], @(x)iscellstr(x));
             ip.addParameter('sweepColor', co(1,:), @(x)ischar(x) || isvector(x));
             ip.addParameter('storedSweepColor', 'r', @(x)ischar(x) || isvector(x));
             ip.parse(varargin{:});
-            
+
             obj.device = device;
             obj.groupBy = ip.Results.groupBy;
             obj.sweepColor = ip.Results.sweepColor;
             obj.storedSweepColor = ip.Results.storedSweepColor;
             obj.prePts = prePts;
-            
+
             obj.createUi();
+            
+            stored = obj.storedSweeps();
+            for i = 1:numel(stored)
+                stored{i}.line = line(stored{i}.x, stored{i}.y, ...
+                    'Parent', obj.axesHandle, ...
+                    'Color', obj.storedSweepColor, ...
+                    'HandleVisibility', 'off');
+            end
+            obj.storedSweeps(stored);
         end
-        
+
         function createUi(obj)
             import appbox.*;
-            iconDir = [fileparts(fileparts(fileparts(mfilename('fullpath')))), '\+util\+icons\'];
+
             toolbar = findall(obj.figureHandle, 'Type', 'uitoolbar');
             storeSweepsButton = uipushtool( ...
                 'Parent', toolbar, ...
                 'TooltipString', 'Store Sweeps', ...
                 'Separator', 'on', ...
-                'ClickedCallback', @obj.onSelectedStoreSweep);
+                'ClickedCallback', @obj.onSelectedStoreSweeps);
             setIconImage(storeSweepsButton, symphonyui.app.App.getResource('icons', 'sweep_store.png'));
             
-            clearStoredButton = uipushtool( ...
+            clearSweepsButton = uipushtool( ...
                 'Parent', toolbar, ...
-                'TooltipString', 'Clear saved sweep', ...
-                'Separator', 'off', ...
-                'ClickedCallback', @obj.onSelectedClearStored);
-            setIconImage(clearStoredButton, [iconDir, 'Xout.png']);
-            
+                'TooltipString', 'Clear Sweeps', ...
+                'ClickedCallback', @obj.onSelectedClearSweeps);
+            setIconImage(clearSweepsButton, symphonyui.app.App.getResource('icons', 'sweep_clear.png'));
+
             obj.axesHandle = axes( ...
                 'Parent', obj.figureHandle, ...
-                'FontName', get(obj.figureHandle, 'DefaultUicontrolFontName'), ...
-                'FontSize', get(obj.figureHandle, 'DefaultUicontrolFontSize'), ...
                 'XTickMode', 'auto');
             xlabel(obj.axesHandle, 'sec');
             obj.sweeps = {};
-            
+
             obj.setTitle([obj.device.name ' Mean Response']);
         end
-        
+
         function setTitle(obj, t)
             set(obj.figureHandle, 'Name', t);
             title(obj.axesHandle, t);
         end
-        
+
         function clear(obj)
             cla(obj.axesHandle);
             obj.sweeps = {};
         end
-        
+
         function handleEpoch(obj, epoch)
             if ~epoch.hasResponse(obj.device)
                 error(['Epoch does not contain a response for ' obj.device.name]);
@@ -102,49 +106,34 @@ classdef AverageFigure < symphonyui.core.FigureHandler
                 end
                 
                 if isempty(parameters)
-                    t = 'All';
+                    t = 'All epochs grouped together';
                 else
                     t = ['Grouped by ' strjoin(parameters.keys, ', ')];
                 end
-                obj.setTitle([obj.device.name ' Mean (' t ')']);
+                obj.setTitle([obj.device.name ' Mean Response (' t ')']);
                 
-                obj.sweepIndex = [];
+                sweepIndex = [];
                 for i = 1:numel(obj.sweeps)
                     if isequal(obj.sweeps{i}.parameters, parameters)
-                        obj.sweepIndex = i;
+                        sweepIndex = i;
                         break;
                     end
                 end
                 
-                if isempty(obj.sweepIndex)
-                    sweep.line = line(x, obj.subBaseline(y), 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
+                if isempty(sweepIndex)
                     sweep.parameters = parameters;
+                    sweep.x = x;
+                    sweep.y = y;
                     sweep.count = 1;
+                    sweep.line = line(sweep.x, obj.subBaseline(sweep.y), 'Parent', obj.axesHandle, 'Color', obj.sweepColor);
                     obj.sweeps{end + 1} = sweep;
                 else
-                    sweep = obj.sweeps{obj.sweepIndex};
-                    cy = get(sweep.line, 'YData');
-                    set(sweep.line, 'YData', (cy * sweep.count + obj.subBaseline(y)) / (sweep.count + 1));
+                    sweep = obj.sweeps{sweepIndex};
+                    sweep.y = (sweep.y * sweep.count + obj.subBaseline(y)) / (sweep.count + 1);
                     sweep.count = sweep.count + 1;
-                    obj.sweeps{obj.sweepIndex} = sweep;
+                    set(sweep.line, 'YData', sweep.y);
+                    obj.sweeps{sweepIndex} = sweep;
                 end
-                
-                 %check for stored data to plot...
-                 storedData = obj.storedAverages();
-                 if ~isempty(storedData)
-                     if ~isempty(obj.storedSweep) %Handle still there
-                         if obj.storedSweep.line.isvalid %Line still there
-                             
-                         else
-                             obj.storedSweep.line = line(storedData(1,:), storedData(2,:),...
-                                 'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
-                         end
-                     else %no handle
-                         obj.storedSweep.line = line(storedData(1,:), storedData(2,:),...
-                             'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
-                     end
-                 end
-                 
                 
                 ylabel(obj.axesHandle, units, 'Interpreter', 'none');
             end
@@ -153,61 +142,55 @@ classdef AverageFigure < symphonyui.core.FigureHandler
         function bldata = subBaseline (obj,vectorin)
             bldata=vectorin - mean(vectorin(1, obj.prePts));
         end
-        
+
     end
-    
-    methods (Static = true)
-        
-    end
-    
+
     methods (Access = private)
+
+        function onSelectedStoreSweeps(obj, ~, ~)
+            obj.storeSweeps();
+        end
         
-        function onSelectedStoreSweep(obj, ~, ~)
-            if isempty(obj.sweepIndex)
-                sweepPull = 1;
-            else
-                sweepPull = obj.sweepIndex;
+        function storeSweeps(obj)
+            obj.clearSweeps();
+            
+            store = obj.sweeps;
+            for i = 1:numel(obj.sweeps)
+                store{i}.line = copyobj(obj.sweeps{i}.line, obj.axesHandle);
+                set(store{i}.line, ...
+                    'Color', obj.storedSweepColor, ...
+                    'HandleVisibility', 'off');
             end
-            if ~isempty(obj.storedSweep) %Handle still there
-                if obj.storedSweep.line.isvalid %Line still there
-                    %delete the old storedSweep
-                    obj.onSelectedClearStored(obj)
-                end
+            obj.storedSweeps(store);
+        end
+        
+        function onSelectedClearSweeps(obj, ~, ~)
+            obj.clearSweeps();
+        end
+        
+        function clearSweeps(obj)
+            stored = obj.storedSweeps();
+            for i = 1:numel(stored)
+                delete(stored{i}.line);
             end
             
-            %save out stored data
-            obj.storedSweep.line = obj.sweeps{sweepPull}.line;
-            obj.storedAverages([obj.storedSweep.line.XData; obj.storedSweep.line.YData]);
-            %set the saved trace to storedSweepColor to indicate that it has been saved
-            obj.storedSweep.line = line(obj.storedSweep.line.XData, obj.storedSweep.line.YData,...
-                        'Parent', obj.axesHandle, 'Color', obj.storedSweepColor);
-        end
-
-        function onSelectedClearStored(obj, ~, ~)
-            obj.storedAverages('Clear');
-            if isfield(obj.storedSweep,'line')
-                obj.storedSweep.line.delete
-            end
+            obj.storedSweeps([]);
         end
 
     end
     
     methods (Static)
-        
-        function averages = storedAverages(averages)
-            % This method stores means across figure handlers.
+
+        function sweeps = storedSweeps(sweeps)
+            % This method stores sweeps across figure handlers.
+
             persistent stored;
-            if (nargin == 0) %retrieve stored data
-               averages = stored;
-            else %set or clear stored data
-                if strcmp(averages,'Clear')
-                    stored = [];
-                else
-                    stored = averages;
-                    averages = stored;
-                end
+            if nargin > 0
+                stored = sweeps;
             end
+            sweeps = stored;
         end
+
     end
-        
+
 end

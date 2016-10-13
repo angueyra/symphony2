@@ -60,10 +60,7 @@ classdef vTails < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function [stim, deactSignal] = createAmpStimulus(obj, pulseNum)
-%             pulseSignal = obj.incrementPerPulse * (double(pulseNum) - 1) + obj.firstPulseSignal;
-            
-%             deactSignal = obj.deactAmp(pulseNum);
-            
+
             deactSignal =((double(pulseNum)-1) * obj.incrementPerPulse) + obj.deactPulseSignal;
             
             

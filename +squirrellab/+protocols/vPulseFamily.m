@@ -29,7 +29,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function p = getPreview(obj, panel)
             p = symphonyui.builtin.previews.StimuliPreview(panel, @()createPreviewStimuli(obj));
             function s = createPreviewStimuli(obj)
-                [nPulses, ~] = obj.leakParsing;
+                [nPulses, ~] = obj.leakParsing; %#ok<*PROPLC>
                 s = cell(1, nPulses);
                 for i = 1:numel(s)
                     s{i} = obj.createAmpStimulus(i);
@@ -39,19 +39,20 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         
         function prepareRun(obj)           
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
-            [nPulses, pulseAmp] = obj.leakParsing;
-            obj.nPulses = nPulses;
+            
+            [obj.nPulses, pulseAmp] = obj.leakParsing;
+            
             % Data Figure
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             % Mean Figure + IV
             obj.showFigure('squirrellab.figures.vPulseFamilyIVFigure', obj.rig.getDevice(obj.amp), ...
                 'prepts',obj.timeToPts(obj.preTime),...
                 'stmpts',obj.timeToPts(obj.stimTime),...
-                'nPulses',double(nPulses),...
+                'nPulses',double(obj.nPulses),...
                 'pulseAmp',pulseAmp+obj.rig.getDevice(obj.amp).background.quantity,...
                 'groupBy', {'pulseSignal'});
-            %Baseline and Variance tracking
-            obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
+            %Baseline and StD tracking
+            obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
         end
