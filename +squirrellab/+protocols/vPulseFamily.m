@@ -83,7 +83,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
             pulseNum = mod(obj.numEpochsPrepared - 1, nPulses) + 1;
             [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
             
-            epoch.addParameter('pulseSignal', pulseSignal);
+            epoch.addParameter('pulseSignal', pulseSignal+obj.rig.getDevice(obj.amp).background.quantity);
             epoch.addStimulus(obj.rig.getDevice(obj.amp), stim);
             epoch.addResponse(obj.rig.getDevice(obj.amp));
         end

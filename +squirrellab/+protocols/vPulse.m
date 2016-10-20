@@ -59,6 +59,7 @@ classdef vPulse < squirrellab.protocols.SquirrelLabProtocol
         function prepareEpoch(obj, epoch)
             prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
             
+            epoch.addParameter('pulseSignal', obj.pulseAmplitude+obj.rig.getDevice(obj.amp).background.quantity);
             epoch.addStimulus(obj.rig.getDevice(obj.amp), obj.createAmpStimulus());
             epoch.addResponse(obj.rig.getDevice(obj.amp));
         end
