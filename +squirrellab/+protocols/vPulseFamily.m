@@ -1,4 +1,4 @@
-classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
+classdef vPulseFamily < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol
     
     properties
         amp                             % Output amplifier
@@ -17,12 +17,13 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
     properties (Hidden)
         ampType
         nPulses
+        plotData
     end
     
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol(obj);
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
         
@@ -38,7 +39,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareRun(obj)           
-            prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol(obj);
             
             [obj.nPulses, pulseAmp] = obj.leakParsing;
             
@@ -76,20 +77,23 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabProtocol(obj, epoch);
-            
-            [nPulses, ~] = obj.leakParsing;
-            
-            pulseNum = mod(obj.numEpochsPrepared - 1, nPulses) + 1;
-            [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
-            
-            epoch.addParameter('pulseSignal', pulseSignal+obj.rig.getDevice(obj.amp).background.quantity);
-            epoch.addStimulus(obj.rig.getDevice(obj.amp), stim);
-            epoch.addResponse(obj.rig.getDevice(obj.amp));
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol(obj, epoch);
+            if obj.runRC
+                % Superclass runs RC epoch
+            else %run normally
+                [nPulses, ~] = obj.leakParsing;
+                
+                pulseNum = mod(obj.numEpochsPrepared - 1, nPulses) + 1;
+                [stim, pulseSignal] = obj.createAmpStimulus(pulseNum);
+                
+                epoch.addParameter('pulseSignal', pulseSignal+obj.rig.getDevice(obj.amp).background.quantity);
+                epoch.addStimulus(obj.rig.getDevice(obj.amp), stim);
+                epoch.addResponse(obj.rig.getDevice(obj.amp));
+            end
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);
