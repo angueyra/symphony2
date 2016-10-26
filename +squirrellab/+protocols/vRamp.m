@@ -4,11 +4,11 @@ classdef vRamp < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrell
         amp                             % Output amplifier
         preTime = 50                    % Ramp leading duration (ms)
         stimTime = 500                  % Ramp duration (ms)
-        tailTime = 50                   % Ramp trailing duration (ms)
+        tailTime = 3000                   % Ramp trailing duration (ms)
         rampStart = -120                % Ramp amplitude (mV or pA)
         rampEnd = 50                    % Ramp amplitude (mV or pA)
-        numberOfAverages = uint16(5)    % Number of epochs
-        interpulseInterval = 0          % Duration between ramps (s)
+        numberOfAverages = uint16(3)    % Number of epochs
+        interpulseInterval = 0.2          % Duration between ramps (s)
     end
     
     properties (Hidden)

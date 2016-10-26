@@ -48,7 +48,7 @@ classdef uLCDhcfLED < squirrellab.protocols.SquirrelLabStageProtocol %io.github.
             prepareRun@io.github.stage_vss.protocols.StageProtocol(obj);
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),'prepts',obj.timeToPts(obj.preTime));
         end
         
         function stim = createLedStimulus(obj)
