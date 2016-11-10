@@ -11,6 +11,7 @@ classdef ModelCell < squirrellab.sources.Cell
             obj.addProperty('mode', 'CELL', ...
                 'type', PropertyType('char', 'row', {'', 'BATH', 'PATCH', 'CELL'}), ...
                 'description', 'mode in use');
+            obj.addAllowableParentType([]);
         end
         
     end

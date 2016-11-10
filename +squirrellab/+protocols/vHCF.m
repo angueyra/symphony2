@@ -65,7 +65,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             g2.preTime = obj.preTime + obj.delayTime;
             g2.stimTime = obj.stim2Time;
             g2.tailTime = (obj.stimTime+obj.tailTime)-(obj.delayTime+obj.stim2Time);
-            g2.amplitude = obj.pulse2Level+obj.pulseLevel-obj.rig.getDevice(obj.amp).background.quantity);
+            g2.amplitude = obj.pulse2Level+obj.pulseLevel-obj.rig.getDevice(obj.amp).background.quantity;
             g2.mean = 0;
             g2.sampleRate = obj.sampleRate;
             g2.units = obj.rig.getDevice(obj.amp).background.displayUnits;
