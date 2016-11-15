@@ -17,10 +17,13 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
         pulse2Level = -90                % Second pulse absolute level (mV or pA)
         numberOfAverages = uint16(3)    % Number of epochs
         interpulseInterval = 5          % Duration between epochs (s)
+        
+        frame
     end
     
     properties (Hidden)
         ampType
+        frameType
         plotData
     end
     
@@ -30,6 +33,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
+            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
         end
         
         function p = getPreview(obj, panel)
@@ -44,12 +48,23 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [0 obj.preTime]);
-            
+            obj.showFigure('squirrellab.figures.ResponseFigure', obj.rig.getDevice(obj.frame));
+        end
+        
+        function stim = createTriggerStimulus(obj)
+            gen = symphonyui.builtin.stimuli.PulseGenerator();
+            gen.preTime = 0;
+            gen.stimTime = 1;
+            gen.tailTime = obj.preTime + obj.stimTime + obj.tailTime - 1;
+            gen.amplitude = 1;
+            gen.mean = 0;
+            gen.sampleRate = obj.sampleRate;
+            gen.units = symphonyui.core.Measurement.UNITLESS;
+            stim = gen.generate();
         end
         
         function stim = createAmpStimulus(obj)           
             g1 = symphonyui.builtin.stimuli.PulseGenerator();
-            
             g1.preTime = obj.preTime;
             g1.stimTime = obj.stimTime;
             g1.tailTime = obj.tailTime;
@@ -57,11 +72,9 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             g1.mean = obj.rig.getDevice(obj.amp).background.quantity;
             g1.sampleRate = obj.sampleRate;
             g1.units = obj.rig.getDevice(obj.amp).background.displayUnits;
-            
             pulse1=g1.generate();
             
             g2 = symphonyui.builtin.stimuli.PulseGenerator();
-            
             g2.preTime = obj.preTime + obj.delayTime;
             g2.stimTime = obj.stim2Time;
             g2.tailTime = (obj.stimTime+obj.tailTime)-(obj.delayTime+obj.stim2Time);
@@ -69,9 +82,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             g2.mean = 0;
             g2.sampleRate = obj.sampleRate;
             g2.units = obj.rig.getDevice(obj.amp).background.displayUnits;
-            
             pulse2=g2.generate();
-
             
             g=symphonyui.builtin.stimuli.SumGenerator();
             g.stimuli={pulse1,pulse2};
@@ -84,8 +95,15 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
             if obj.runRC
                 % Superclass runs RC epoch
             else %run normally
+                % generate trigger
+                trigger = obj.rig.getDevices('Trigger');
+                if ~isempty(trigger)
+                    epoch.addStimulus(trigger{1}, obj.createTriggerStimulus());
+                end
+            
                 epoch.addStimulus(obj.rig.getDevice(obj.amp), obj.createAmpStimulus());
                 epoch.addResponse(obj.rig.getDevice(obj.amp));
+                epoch.addResponse(obj.rig.getDevice(obj.frame));
             end
         end
         

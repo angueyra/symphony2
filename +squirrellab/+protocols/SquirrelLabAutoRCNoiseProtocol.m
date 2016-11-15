@@ -8,9 +8,9 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
     
     properties (Hidden)
 		runRC
-        RCpreTime = 50
-        RCstimTime = 500
-        RCtailTime = 50
+        RCpreTime = 25
+        RCstimTime = 200
+        RCtailTime = 25
         RCsd = .5
         RCfreqcutoff = 10000
         RCnumberOfFilters = 4
