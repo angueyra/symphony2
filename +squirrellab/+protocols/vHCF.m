@@ -3,7 +3,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseProtocol %squirrella
     % horizontal cell. Consists of a sum of 2 vSteps, first to -30 mV then
     % briefly to -90 mV (Vm in this protocol are defined in absolute value
     % instead of relative to holding potential).
-    % Follows protocol form Warren, vanHook, et. al, J.NeuroSci (2016)
+    % Follows protocol from Warren, vanHook, et. al, J.NeuroSci (2016)
     properties
         amp                             % Output amplifier
         preTime = 1000                    % First pulse leading duration (ms)

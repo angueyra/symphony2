@@ -1,6 +1,11 @@
-classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.SquirrelLabProtocol
-% delivers a 5 mV voltage pulse every time protocol is run to keep track
-% of access resistance and membrane capacitance
+classdef (Abstract) SquirrelLabAutoRCNoiseSineProtocol < squirrellab.protocols.SquirrelLabProtocol
+% Before each run, this protocol adds epochs in which short voltage stimulus is delivered.
+% The stimulus is composed of a noise segment and a low frequency sine segment. 
+% Based on these, it should be possible to perform
+% accurate leak subtraction with clean capture of capacitative component
+% (derived as linear filter of noise stimulation) and of steady-state
+% current (by deriving linear relation between low freq. voltage
+% stimulation and measure leak current).
 
     properties
        autoRC = true;
@@ -8,13 +13,18 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
     
     properties (Hidden)
 		runRC
-        RCpreTime = 25
-        RCstimTime = 200
-        RCtailTime = 25
+        RCpreTime = 50
+        RCnoiseTime = 200
+        RCinterTime = 100
+        RCsineTime = 1000
+        RCtailTime = 50
         RCsd = .5
         RCfreqcutoff = 10000
         RCnumberOfFilters = 4
         RCnumberOfAverages = 1
+        RCsineAmplitude = 2
+        RCsineFreq = 5
+        RCphaseShift = 0
         RCinterpulseInterval = 0
         RCEpochsPrepared
         RCEpochsCompleted
@@ -41,7 +51,7 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
                 clf(obj.plotData.figure); %clear figure
                 obj.plotData.axes = axes('Parent', obj.plotData.figure, 'NextPlot', 'replace');
 
-                % plot three lines of zero
+                % plot line of zero
                 totPts = obj.getRCTotalPts();
                 timePts = (1:totPts) / obj.sampleRate;
                 obj.plotData.lines = cell(1,1);
@@ -61,7 +71,7 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
         
         
         function prepareEpoch(obj, epoch)
-            % add remperature controller monitor
+            % add temperature controller monitor
             T5Controller = obj.rig.getDevices('T5Controller');
             if ~isempty(T5Controller)
                 epoch.addResponse(T5Controller{1});
@@ -72,12 +82,21 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
                 [seed, stim] = obj.createRCNoiseStimulus();
                 epoch.addParameter('RCepoch', 1);
                 epoch.addParameter('RCpreTime', obj.RCpreTime);
-                epoch.addParameter('RCstimTime', obj.RCstimTime);
+                epoch.addParameter('RCnoiseTime', obj.RCnoiseTime);
+                epoch.addParameter('RCinterTime', obj.RCinterTime);
+                epoch.addParameter('RCsineTime', obj.RCsineTime);
                 epoch.addParameter('RCtailTime', obj.RCtailTime);
+                
                 epoch.addParameter('RCsd', obj.RCsd);
                 epoch.addParameter('RCfreqcutoff', obj.RCfreqcutoff);
                 epoch.addParameter('RCseed', seed);
                 epoch.addParameter('RCnumberOfFilters', obj.RCnumberOfFilters);
+                
+                epoch.addParameter('RCsineAmplitude', obj.RCsineAmplitude);
+                epoch.addParameter('RCsineFreq', obj.RCsineFreq);
+                epoch.addParameter('RCphaseShift', obj.RCphaseShift);
+                
+                
                 epoch.addParameter('RCnumberOfAverages', obj.RCnumberOfAverages);
                 epoch.addParameter('RCinterpulseInterval', obj.RCinterpulseInterval);
                 epoch.addStimulus(obj.rig.getDevice(obj.amp), stim);
@@ -129,24 +148,45 @@ classdef (Abstract) SquirrelLabAutoRCNoiseProtocol < squirrellab.protocols.Squir
         function [seed, stim] = createRCNoiseStimulus(obj)
             
             seed = RandStream.shuffleSeed;
-            gen = squirrellab.stimuli.GaussianNoiseGeneratorV2();
+            gennoise = squirrellab.stimuli.GaussianNoiseGeneratorV2();
             
-            gen.preTime = obj.RCpreTime;
-            gen.stimTime = obj.RCstimTime;
-            gen.tailTime = obj.RCtailTime;
-            gen.stDev = obj.RCsd;
-            gen.freqCutoff = obj.RCfreqcutoff;
-            gen.numFilters = obj.RCnumberOfFilters;
-            gen.mean = obj.rig.getDevice(obj.amp).background.quantity;
-            gen.seed = seed;
-            gen.sampleRate = obj.sampleRate;
-            gen.units = obj.rig.getDevice(obj.amp).background.displayUnits;
+            gennoise.preTime = obj.RCpreTime;
+            gennoise.stimTime = obj.RCnoiseTime;
+            gennoise.tailTime = obj.RCinterTime+obj.RCsineTime+obj.RCtailTime;
+            gennoise.stDev = obj.RCsd;
+            gennoise.freqCutoff = obj.RCfreqcutoff;
+            gennoise.numFilters = obj.RCnumberOfFilters;
+            gennoise.mean = obj.rig.getDevice(obj.amp).background.quantity;
+            gennoise.seed = seed;
+            gennoise.sampleRate = obj.sampleRate;
+            gennoise.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
-            stim = gen.generate();
+            stim_noise = gennoise.generate();
+            
+            
+            gensine = symphonyui.builtin.stimuli.SineGenerator();
+            
+            gensine.preTime = obj.RCpreTime+obj.RCnoiseTime+obj.RCinterTime;
+            gensine.stimTime = obj.RCsineTime;
+            gensine.tailTime = obj.RCtailTime;
+            gensine.period = 1000/obj.RCsineFreq; % converting to ms
+            gensine.phase = obj.RCphaseShift;
+            gensine.mean = 0;
+            gensine.amplitude = obj.RCsineAmplitude;
+            gensine.sampleRate = obj.sampleRate;
+            gensine.units = obj.rig.getDevice(obj.led).background.displayUnits;
+            
+            stim_sine = gensine.generate();
+            
+            
+            g=symphonyui.builtin.stimuli.SumGenerator();
+            g.stimuli={stim_noise,stim_sine};
+            
+            stim=g.generate;
         end
         
         function num = getRCTotalPts(obj)
-            num = (obj.RCpreTime + obj.RCstimTime + obj.RCtailTime) * ...
+            num = (obj.RCpreTime + obj.RCnoiseTime + obj.RCinterTime + obj.RCsineTime + obj.RCtailTime) * ...
                 obj.sampleRate / 1000;
         end
     end
