@@ -64,26 +64,28 @@ classdef ProgressFigure < symphonyui.core.FigureHandler
         end
         
         function handleEpochOrInterval(obj, epochOrInterval)
-            if epochOrInterval.isInterval()
-                obj.numIntervalsCompleted = obj.numIntervalsCompleted + 1;
-                
-                interval = epochOrInterval;
-                if isempty(obj.averageIntervalDuration)
-                    obj.averageIntervalDuration = interval.duration;
-                else
-                    obj.averageIntervalDuration = obj.averageIntervalDuration * (obj.numIntervalsCompleted - 1)/obj.numIntervalsCompleted + interval.duration/obj.numIntervalsCompleted;
-                end
-            else
-                obj.numEpochsCompleted = obj.numEpochsCompleted + 1;
+            if ~epochOrInterval.parameters.isKey.('RCepoch')
+                if epochOrInterval.isInterval()
+                    obj.numIntervalsCompleted = obj.numIntervalsCompleted + 1;
 
-                epoch = epochOrInterval;
-                if isempty(obj.averageEpochDuration)
-                    obj.averageEpochDuration = epoch.duration;
+                    interval = epochOrInterval;
+                    if isempty(obj.averageIntervalDuration)
+                        obj.averageIntervalDuration = interval.duration;
+                    else
+                        obj.averageIntervalDuration = obj.averageIntervalDuration * (obj.numIntervalsCompleted - 1)/obj.numIntervalsCompleted + interval.duration/obj.numIntervalsCompleted;
+                    end
                 else
-                    obj.averageEpochDuration = obj.averageEpochDuration * (obj.numEpochsCompleted - 1)/obj.numEpochsCompleted + epoch.duration/obj.numEpochsCompleted;
+                    obj.numEpochsCompleted = obj.numEpochsCompleted + 1;
+
+                    epoch = epochOrInterval;
+                    if isempty(obj.averageEpochDuration)
+                        obj.averageEpochDuration = epoch.duration;
+                    else
+                        obj.averageEpochDuration = obj.averageEpochDuration * (obj.numEpochsCompleted - 1)/obj.numEpochsCompleted + epoch.duration/obj.numEpochsCompleted;
+                    end
+
+                    obj.updateProgress();
                 end
-                
-                obj.updateProgress();
             end
         end
         

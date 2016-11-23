@@ -174,7 +174,7 @@ classdef (Abstract) SquirrelLabAutoRCNoiseSineProtocol < squirrellab.protocols.S
             gensine.mean = 0;
             gensine.amplitude = obj.RCsineAmplitude;
             gensine.sampleRate = obj.sampleRate;
-            gensine.units = obj.rig.getDevice(obj.led).background.displayUnits;
+            gensine.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
             stim_sine = gensine.generate();
             

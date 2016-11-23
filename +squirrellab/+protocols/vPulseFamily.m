@@ -4,13 +4,13 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         amp                             % Output amplifier
         preTime = 100                   % Pulse leading duration (ms)
         stimTime = 500                  % Pulse duration (ms)
-        tailTime = 2000                 % Pulse trailing duration (ms)
+        tailTime = 1500                 % Pulse trailing duration (ms)
         firstPulseSignal = -60          % First pulse signal value (mV or pA)
         incrementPerPulse = 10          % Increment value per each pulse (mV or pA)
         leakSub = true                  % Attempt leak subtraction with 5mV pulses
         leakN = uint16(2)               % Number of pairs of low voltage stimuli to run for leak subtraction
         pulsesInFamily = uint16(15)     % Number of pulses in family
-        numberOfAverages = uint16(3)    % Number of families
+        numberOfAverages = uint16(1)    % Number of families
         interpulseInterval = 0          % Duration between pulses (s)
     end
     
@@ -56,6 +56,7 @@ classdef vPulseFamily < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
             obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @std}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
+            obj.showFigure('squirrellab.figures.ProgressFigure', obj.numberOfAverages * obj.nPulses);
         end
         
         function [stim, pulseSignal] = createAmpStimulus(obj, pulseNum)
