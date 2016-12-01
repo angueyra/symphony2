@@ -22,7 +22,7 @@ classdef (Abstract) SquirrelLabAutoRCNoiseSineProtocol < squirrellab.protocols.S
         RCfreqcutoff = 10000
         RCnumberOfFilters = 4
         RCnumberOfAverages = 1
-        RCsineAmplitude = 2
+        RCsineAmplitude = 5
         RCsineFreq = 5
         RCphaseShift = 0
         RCinterpulseInterval = 0
