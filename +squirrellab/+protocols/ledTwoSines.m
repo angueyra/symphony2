@@ -1,22 +1,22 @@
-classdef ledRedBlueSine < squirrellab.protocols.SquirrelLabProtocol
-    %sine test code
+classdef ledTwoSines < squirrellab.protocols.SquirrelLabProtocol
+    % First epoch: led1 only; Second epoch = led2 only; Third epoch: led1 +
+    % led2
     
     properties
-        useRandomSeed = true
-        preTime = 100
+        preTime = 200
         stimTime = 1000
-        tailTime = 100
-        period = 500
+        tailTime = 200
+        sineFrequency = 2        % in Hz
         led1
-        Amp1 = 0.05
-        lightMean1 = 0.1
+        Amp1 = 1
+        lightMean1 = 4
         led2
-        Amp2 = 0.05
-        lightMean2 = 0.1
-        phaseShift = 0
+        Amp2 = 1
+        lightMean2 = 4
+        phaseShift = 180 % in degrees
         amp
         ampHoldSignal = -60
-        numberOfAverages = uint16(5)    % Number of epochs
+        numberOfAverages = uint16(6)    % Number of epochs
         interpulseInterval = 0          % Duration between pulses (s)
     end
     
@@ -24,6 +24,7 @@ classdef ledRedBlueSine < squirrellab.protocols.SquirrelLabProtocol
         led1Type
         led2Type
         ampType
+        period
     end
     
     methods
@@ -34,6 +35,7 @@ classdef ledRedBlueSine < squirrellab.protocols.SquirrelLabProtocol
             [obj.led1, obj.led1Type] = obj.createDeviceNamesProperty('LED');
             [obj.led2, obj.led2Type] = obj.createDeviceNamesProperty('LED');
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
+            obj.period = 1000 / (obj.sineFrequency);
         end
         
             
@@ -52,9 +54,10 @@ classdef ledRedBlueSine < squirrellab.protocols.SquirrelLabProtocol
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
 
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), 'GroupBy',{'PlotGroup'});
-            obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp), 'prepts',obj.timeToPts(obj.preTime),...
+                'GroupBy',{'PlotGroup'});
+            obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
 

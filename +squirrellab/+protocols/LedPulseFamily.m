@@ -2,11 +2,12 @@ classdef ledPulseFamily < squirrellab.protocols.SquirrelLabProtocol
     
     properties
         led                             % Output LED
-        preTime = 10                    % Pulse leading duration (ms)
-        stimTime = 100                  % Pulse duration (ms)
-        tailTime = 400                  % Pulse trailing duration (ms)
-        firstLightAmplitude = 1         % First pulse amplitude (V)
-        pulsesInFamily = uint16(3)      % Number of pulses in family
+        preTime = 100                   % Pulse leading duration (ms)
+        stimTime = 10                   % Pulse duration (ms)
+        tailTime = 390                  % Pulse trailing duration (ms)
+        firstLightAmplitude = 3         % First pulse amplitude (V)
+        incrementPerPulse = 0.5         % Cumulative amplitude increase per trial (V)
+        pulsesInFamily = uint16(12)     % Number of pulses in family
         lightMean = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
         numberOfAverages = uint16(5)    % Number of families
@@ -40,10 +41,11 @@ classdef ledPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         function prepareRun(obj)
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
-            obj.showFigure('symphonyui.builtin.figures.ResponseFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('symphonyui.builtin.figures.MeanResponseFigure', obj.rig.getDevice(obj.amp), ...
+            obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp), ...
+                'prepts',obj.timeToPts(obj.preTime),...
                 'groupBy', {'lightAmplitude'});
-            obj.showFigure('symphonyui.builtin.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
+            obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
             
@@ -51,7 +53,7 @@ classdef ledPulseFamily < squirrellab.protocols.SquirrelLabProtocol
         end
         
         function [stim, lightAmplitude] = createLedStimulus(obj, pulseNum)
-            lightAmplitude = obj.firstLightAmplitude * 2^(double(pulseNum) - 1);
+            lightAmplitude = obj.incrementPerPulse *(double(pulseNum) - 1) + obj.firstLightAmplitude;
             
             gen = symphonyui.builtin.stimuli.PulseGenerator();
             

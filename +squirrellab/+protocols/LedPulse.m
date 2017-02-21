@@ -8,7 +8,7 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
         lightAmplitude = 5              % Pulse amplitude (V)
         lightMean = 0                   % Pulse and LED background mean (V)
         amp                             % Input amplifier
-        frame                           % Frame monitor
+%         frame                           % Frame monitor
         numberOfAverages = uint16(1)    % Number of epochs
         interpulseInterval = 0          % Duration between pulses (s)
     end
@@ -26,7 +26,7 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
             
             [obj.led, obj.ledType] = obj.createDeviceNamesProperty('LED');
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
-            [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
+%             [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
         end
         
         function p = getPreview(obj, panel)
@@ -37,7 +37,7 @@ classdef ledPulse < squirrellab.protocols.SquirrelLabProtocol
             prepareRun@squirrellab.protocols.SquirrelLabProtocol(obj);
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
-            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),obj.timeToPts(obj.preTime));
+            obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),'prepts',obj.timeToPts(obj.preTime));
             obj.showFigure('squirrellab.figures.ResponseStatisticsFigure', obj.rig.getDevice(obj.amp), {@mean, @var}, ...
                 'baselineRegion', [0 obj.preTime], ...
                 'measurementRegion', [obj.preTime obj.preTime+obj.stimTime]);
