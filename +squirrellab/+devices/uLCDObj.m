@@ -13,7 +13,7 @@ classdef uLCDObj < handle
                 if strcmpi(util.getComputerID,'.B9655E47BAE8.C73F818834B3') % rigA
                     port = 'COM3';
                     baudRate = 875000;
-                elseif strcmpi(util.getComputerID,'.E731CAE0A4C2.8C634CCD9F92') %nih laptop
+                elseif strcmpi(util.getComputerID,'.873F71E3EA21.8C634CCD9F92') %nih laptop
                     port = '/dev/tty.SLAB_USBtoUART';
                     baudRate = 9600;
                 else %rigB (2-photon)
