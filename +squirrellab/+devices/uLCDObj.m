@@ -116,17 +116,14 @@ classdef uLCDObj < handle
         end
         
         function moveRing(obj,stX,stY,fX,fY,rInner,rOuter,frames)
-            obj.clear;
+            
             
             deltaX=abs(stX-fX)/frames;
             deltaY=abs(stY-fY)/frames;
             
             for f=0:frames
-                if f>0
-%                     obj.spot_black(stX+(deltaX*(f-1)),stY+(deltaY*(f-1)),rOuter);
-                end
-                obj.spot_white(stX+(deltaX*f),stY+(deltaY*f),rOuter);
-                obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rInner);
+                obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rOuter);
+                obj.ring_white(stX+(deltaX*f),stY+(deltaY*f),rInner,rOuter);
             end
         end
         
