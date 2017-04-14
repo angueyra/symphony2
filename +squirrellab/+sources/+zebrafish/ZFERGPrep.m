@@ -37,7 +37,7 @@ classdef ZFERGPrep < symphonyui.core.persistent.descriptions.SourceDescription
             obj.addProperty('recording mode', 'pierced cornea', ...
     			'type', PropertyType('char', 'row', {'pierced cornea', 'on cornea', 'erg chamber', ''}));
             
-            obj.addAllowableParentType('squirrellab.sources.squirrel.Zebrafish');
+            obj.addAllowableParentType('squirrellab.sources.zebrafish.Zebrafish');
         end
         
     end

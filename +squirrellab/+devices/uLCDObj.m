@@ -4,6 +4,7 @@ classdef uLCDObj < handle
     %for circle(y,x)
     properties %(Access = private, Transient)
         serialPort
+        baudRate = 875000
     end
 
     methods
@@ -12,17 +13,17 @@ classdef uLCDObj < handle
             if nargin < 1
                 if strcmpi(util.getComputerID,'.B9655E47BAE8.C73F818834B3') % rigA
                     port = 'COM3';
-                    baudRate = 875000;
+                    obj.baudRate = 875000;
                 elseif strcmpi(util.getComputerID,'.873F71E3EA21.8C634CCD9F92') %nih laptop
                     port = '/dev/tty.SLAB_USBtoUART';
-                    baudRate = 9600;
+                    obj.baudRate = 9600;
                 else %rigB (2-photon)
                     port = 'COM9';
-                    baudRate = 875000;
+                    obj.baudRate = 875000;
                 end
             end
 
-            obj.serialPort = serial(port,'BaudRate',baudRate);%default=9600%max=875000 
+            obj.serialPort = serial(port,'BaudRate',obj.baudRate);%default=9600%max=875000 
         end
         
         function delete(obj)
@@ -127,16 +128,13 @@ classdef uLCDObj < handle
             deltaY=abs(stY-fY)/frames;
             
             for f=0:frames
-<<<<<<< HEAD
                 obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rOuter);
                 obj.ring_white(stX+(deltaX*f),stY+(deltaY*f),rInner,rOuter);
-=======
                 if f>0
                     obj.spot_black(stX+(deltaX*(f-1)),stY+(deltaY*(f-1)),rOuter);
                 end
                 obj.spot_white(stX+(deltaX*f),stY+(deltaY*f),rOuter);
                 obj.spot_black(stX+(deltaX*f),stY+(deltaY*f),rInner);
->>>>>>> origin/master
             end
         end
         
