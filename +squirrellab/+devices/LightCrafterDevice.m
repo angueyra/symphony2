@@ -53,6 +53,7 @@ classdef LightCrafterDevice < symphonyui.core.Device
             
             obj.addConfigurationSetting('canvasSize', canvasSize, 'isReadOnly', true);
             obj.addConfigurationSetting('trueCanvasSize', trueCanvasSize, 'isReadOnly', true);
+            obj.addConfigurationSetting('centerOffset', [0 0], 'isReadOnly', true);
             obj.addConfigurationSetting('monitorRefreshRate', refreshRate, 'isReadOnly', true);
             obj.addConfigurationSetting('prerender', false, 'isReadOnly', true);
             obj.addConfigurationSetting('lightCrafterLedEnables',  [auto, red, green, blue], 'isReadOnly', true);
@@ -73,12 +74,29 @@ classdef LightCrafterDevice < symphonyui.core.Device
             end
         end
         
+        function v = getConfigurationSetting(obj, name)
+            % TODO: This is a faster version of Device.getConfigurationSetting(). It should be moved to Device.
+            
+            v = obj.tryCoreWithReturn(@()obj.cobj.Configuration.Item(name));
+            v = obj.valueFromPropertyValue(convert(v));
+        end
+        
         function s = getCanvasSize(obj)
             s = obj.getConfigurationSetting('canvasSize');
         end
         
         function s = getTrueCanvasSize(obj)
             s = obj.getConfigurationSetting('trueCanvasSize');
+        end
+        
+        function setCenterOffset(obj, o)
+            delta = o - obj.getCenterOffset();
+            obj.stageClient.setCanvasProjectionTranslate(delta(1), delta(2), 0);
+            obj.setReadOnlyConfigurationSetting('centerOffset', [o(1) o(2)]);
+        end
+        
+        function o = getCenterOffset(obj)
+            o = obj.getConfigurationSetting('centerOffset');
         end
         
         function r = getMonitorRefreshRate(obj)
@@ -95,17 +113,18 @@ classdef LightCrafterDevice < symphonyui.core.Device
         
         function play(obj, presentation)
             canvasSize = obj.getCanvasSize();
+            centerOffset = obj.getCenterOffset();
             
             background = stage.builtin.stimuli.Rectangle();
             background.size = canvasSize;
-            background.position = canvasSize/2;
+            background.position = canvasSize/2 - centerOffset;
             background.color = presentation.backgroundColor;
             presentation.setBackgroundColor(0);
             presentation.insertStimulus(1, background);
             
             tracker = stage.builtin.stimuli.Rectangle();
             tracker.size = [canvasSize(1) * 1/8, canvasSize(2)];
-            tracker.position = [canvasSize(1) - (canvasSize(1)/16), canvasSize(2)/2];
+            tracker.position = [canvasSize(1) - (canvasSize(1)/16), canvasSize(2)/2] - centerOffset;
             presentation.addStimulus(tracker);
             
             trackerColor = stage.builtin.controllers.PropertyController(tracker, 'color', @(s)mod(s.frame, 2) && double(s.time + (1/s.frameRate) < presentation.duration));
@@ -130,6 +149,21 @@ classdef LightCrafterDevice < symphonyui.core.Device
         
         function clearMemory(obj)
            obj.stageClient.clearMemory();
+        end
+        
+        function setSingleLedEnable(obj, setting)
+            switch lower(setting)
+                case 'auto'
+                    obj.setLedEnables(true, false, false, false);
+                case 'red'
+                    obj.setLedEnables(false, true, false, false);
+                case 'green'
+                    obj.setLedEnables(false, false, true, false);
+                case 'blue'
+                    obj.setLedEnables(false, false, false, true);
+                otherwise
+                    error('Unknown LED enable setting');
+            end
         end
         
         function setLedEnables(obj, auto, red, green, blue)
@@ -167,7 +201,46 @@ classdef LightCrafterDevice < symphonyui.core.Device
             p = round(um / micronsPerPixel);
         end
         
+        function u = pix2um(obj, pix)
+            micronsPerPixel = obj.getConfigurationSetting('micronsPerPixel');
+            u = pix * micronsPerPixel;
+        end
+        
     end
     
 end
 
+function v = convert(dotNetValue)
+    % TODO: Remove when getConfigurationSetting() is removed from this class.
+
+    v = dotNetValue;
+    if ~isa(v, 'System.Object')
+        return;
+    end
+    
+    clazz = strtok(class(dotNetValue), '[');
+    switch clazz
+        case 'System.Int16'
+            v = int16(v);
+        case 'System.UInt16'
+            v = uint16(v);
+        case 'System.Int32'
+            v = int32(v);
+        case 'System.UInt32'
+            v = uint32(v);
+        case 'System.Int64'
+            v = int64(v);
+        case 'System.UInt64'
+            v = uint64(v);
+        case 'System.Single'
+            v = single(v);
+        case 'System.Double'
+            v = double(v);
+        case 'System.Boolean'
+            v = logical(v);
+        case 'System.Byte'
+            v = uint8(v);
+        case {'System.Char', 'System.String'}
+            v = char(v);
+    end
+end

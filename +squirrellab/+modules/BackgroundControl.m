@@ -1,12 +1,21 @@
 classdef BackgroundControl < symphonyui.ui.Module
     
     properties (Access = private)
+        log
+        settings
+        toolbar
+        turnLedsOffTool
         devices
         deviceListeners
         deviceGrid
     end
     
     methods
+        
+        function obj = BackgroundControl()
+            obj.log = log4m.LogManager.getLogger(class(obj));
+            obj.settings = edu.washington.riekelab.modules.settings.BackgroundControlSettings();
+        end
         
         function createUi(obj, figureHandle)
             import appbox.*;
@@ -15,7 +24,12 @@ classdef BackgroundControl < symphonyui.ui.Module
                 'Name', 'Background Control', ...
                 'Position', screenCenter(290, 100));
             
-            mainLayout = uix.HBox( ...
+            obj.toolbar = Menu(figureHandle);
+            obj.turnLedsOffTool = obj.toolbar.addPushTool( ...
+                'Label', 'Turn LEDs Off', ...
+                'Callback', @obj.onSelectedTurnLedsOff);
+            
+            mainLayout = uix.VBox( ...
                 'Parent', figureHandle);
             
             obj.deviceGrid = uiextras.jide.PropertyGrid(mainLayout, ...
@@ -30,6 +44,24 @@ classdef BackgroundControl < symphonyui.ui.Module
         function willGo(obj)
             obj.devices = obj.configurationService.getOutputDevices();
             obj.populateDeviceGrid();
+            try
+                obj.loadSettings();
+            catch x
+                obj.log.debug(['Failed to load settings: ' x.message], x);
+            end
+        end
+        
+        function willStop(obj)
+            try
+                obj.saveSettings();
+            catch x
+                obj.log.debug(['Failed to save settings: ' x.message], x);
+            end
+        end
+        
+        function didStop(obj)
+            obj.toolbar.close();
+            obj.deviceGrid.Close();
         end
         
         function bind(obj)
@@ -80,6 +112,21 @@ classdef BackgroundControl < symphonyui.ui.Module
             obj.deviceGrid.UpdateProperties(fields);
         end
         
+        function onSelectedTurnLedsOff(obj, ~, ~)
+            obj.deviceGrid.StopEditing();
+            leds = obj.configurationService.getDevices('LED');
+            for i = 1:numel(leds)
+                led = leds{i};
+                if strcmp(led.background.baseUnits, 'V')
+                    led.background = symphonyui.core.Measurement(-1, led.background.displayUnits);
+                    led.applyBackground();
+                else
+                    led.background = symphonyui.core.Measurement(0, led.background.displayUnits);
+                    led.applyBackground();
+                end
+            end
+        end
+        
         function onSetBackground(obj, ~, event)
             p = event.Property;
             device = obj.configurationService.getDevice(p.Name);
@@ -92,6 +139,13 @@ classdef BackgroundControl < symphonyui.ui.Module
                 obj.view.showError(x.message);
                 return;
             end
+            if ismethod(device, 'availableModes')
+                for i = 1:numel(device.availableModes)
+                    mode = device.availableModes{i};
+                    b = device.getBackgroundForMode(mode);
+                    device.setBackgroundForMode(mode, symphonyui.core.Measurement(p.Value, b.displayUnits));
+                end
+            end
         end
         
         function onServiceInitializedRig(obj, ~, ~)
@@ -103,6 +157,17 @@ classdef BackgroundControl < symphonyui.ui.Module
         
         function onDeviceSetBackground(obj, ~, ~)
             obj.updateDeviceGrid();
+        end
+        
+        function loadSettings(obj)
+            if ~isempty(obj.settings.viewPosition)
+                obj.view.position = obj.settings.viewPosition;
+            end
+        end
+
+        function saveSettings(obj)
+            obj.settings.viewPosition = obj.view.position;
+            obj.settings.save();
         end
         
     end
