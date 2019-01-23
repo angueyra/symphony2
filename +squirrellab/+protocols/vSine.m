@@ -1,4 +1,4 @@
-classdef vSine < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
+classdef vSine < squirrellab.protocols.SquirrelLabAutoRCProtocol %squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     
     properties
         amp                             % Output amplifier
@@ -21,7 +21,8 @@ classdef vSine < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+%             didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
@@ -31,7 +32,7 @@ classdef vSine < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp),'prepts',obj.timeToPts(obj.preTime));
@@ -52,13 +53,13 @@ classdef vSine < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
             gen.mean = obj.rig.getDevice(obj.amp).background.quantity;
             gen.amplitude = obj.sineAmplitude;
             gen.sampleRate = obj.sampleRate;
-            gen.units = obj.rig.getDevice(obj.led).background.displayUnits;
+            gen.units = obj.rig.getDevice(obj.amp).background.displayUnits;
             
             stim = gen.generate();
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, epoch);
             if obj.runRC
                 % Superclass runs RC epoch
             else %run normally
@@ -68,7 +69,7 @@ classdef vSine < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

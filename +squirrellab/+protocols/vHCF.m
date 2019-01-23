@@ -1,4 +1,4 @@
-classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol %squirrellab.protocols.SquirrelLabProtocol
+classdef vHCF <  squirrellab.protocols.SquirrelLabAutoRCProtocol %squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     % Protocol to stimulate feedback to cones while voltage-clamping a
     % horizontal cell. Consists of a sum of 2 vSteps, first to -30 mV then
     % briefly to -90 mV (Vm in this protocol are defined in absolute value
@@ -30,7 +30,8 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol %squirr
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+%             didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
             [obj.frame, obj.frameType] = obj.createDeviceNamesProperty('FrameMonitor');
@@ -41,7 +42,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol %squirr
         end
         
         function prepareRun(obj)
-            prepareRun@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
            
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp));
@@ -92,7 +93,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol %squirr
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, epoch);
             if obj.runRC
                 % Superclass runs RC epoch
             else %run normally
@@ -109,7 +110,7 @@ classdef vHCF < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol %squirr
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

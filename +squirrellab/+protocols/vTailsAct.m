@@ -1,4 +1,4 @@
-classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
+classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCProtocol %squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     
     properties
         amp                             % Output amplifier
@@ -25,7 +25,8 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     methods
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+%             didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
@@ -41,7 +42,7 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareRun(obj)           
-            prepareRun@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
             obj.showFigure('squirrellab.figures.AverageFigure', obj.rig.getDevice(obj.amp), ...
@@ -93,7 +94,7 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, epoch);
             if obj.runRC
                 % Superclass runs RC epoch
             else %run normally
@@ -110,7 +111,7 @@ classdef vTailsAct < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);

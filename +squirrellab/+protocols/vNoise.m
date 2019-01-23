@@ -1,4 +1,4 @@
-classdef vNoise < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
+classdef vNoise <  squirrellab.protocols.SquirrelLabAutoRCProtocol %squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
     % Presents families of gaussian noise stimuli to a specified amplifier and records responses from a specified amplifier.
     % Each family consists of a set of noise stimuli with the standard deviation of noise starting at startStdv. Each
     % standard deviation value is repeated repeatsPerStdv times before moving to the next standard deviation value which
@@ -50,13 +50,14 @@ classdef vNoise < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function didSetRig(obj)
-            didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+%             didSetRig@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            didSetRig@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             [obj.amp, obj.ampType] = obj.createDeviceNamesProperty('Amp');
         end
         
         function d = getPropertyDescriptor(obj, name)
-            d = getPropertyDescriptor@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, name);
+            d = getPropertyDescriptor@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, name);
             
             if strncmp(name, 'amp2', 4) && numel(obj.rig.getDeviceNames('Amp')) < 2
                 d.isHidden = true;
@@ -79,7 +80,7 @@ classdef vNoise < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareRun(obj)
-            prepareRun@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj);
+            prepareRun@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj);
             
             if numel(obj.rig.getDeviceNames('Amp')) < 2
                 obj.showFigure('squirrellab.figures.DataFigure', obj.rig.getDevice(obj.amp));
@@ -125,7 +126,7 @@ classdef vNoise < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareEpoch(obj, epoch)
-            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, epoch);
+            prepareEpoch@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, epoch);
             
             persistent seed;
             if ~obj.useRandomSeed
@@ -148,7 +149,7 @@ classdef vNoise < squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol
         end
         
         function prepareInterval(obj, interval)
-            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCNoiseSineProtocol(obj, interval);
+            prepareInterval@squirrellab.protocols.SquirrelLabAutoRCProtocol(obj, interval);
             
             device = obj.rig.getDevice(obj.amp);
             interval.addDirectCurrentStimulus(device, device.background, obj.interpulseInterval, obj.sampleRate);
