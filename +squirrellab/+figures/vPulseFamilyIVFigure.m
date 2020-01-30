@@ -31,7 +31,7 @@ classdef vPulseFamilyIVFigure < symphonyui.core.FigureHandler
             ip.addParameter('pulseAmp', [], @(x)isvector(x));
             
             ip.addParameter('groupBy', [], @(x)iscellstr(x));
-            ip.addParameter('storedSweepColor', 'r', @(x)ischar(x) || isvector(x));
+            ip.addParameter('storedSweepColor', [0.25,0.25,0.25], @(x)ischar(x) || isvector(x));
             ip.parse(varargin{:});
             
             obj.device = device;

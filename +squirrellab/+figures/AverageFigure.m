@@ -22,7 +22,7 @@ classdef AverageFigure < symphonyui.core.FigureHandler
             ip = inputParser();
             ip.addParameter('groupBy', [], @(x)iscellstr(x));
             ip.addParameter('sweepColor', co(1,:), @(x)ischar(x) || isvector(x));
-            ip.addParameter('storedSweepColor', 'r', @(x)ischar(x) || isvector(x));
+            ip.addParameter('storedSweepColor', [0.25,0.25,.25], @(x)ischar(x) || isvector(x));
             ip.addParameter('prePts', 100, @(x)isnumeric(x) || isvector(x));
             ip.parse(varargin{:});
 

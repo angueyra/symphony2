@@ -6,13 +6,7 @@ classdef Organoid < squirrellab.sources.Subject
             import symphonyui.core.*;
             
             obj.addProperty('species', 'hiPSC', ...
-                'type', PropertyType('char', 'row', {'hiPSC', 'H9','PEN8E',''}));
-
-%             photoreceptors = containers.Map();
-%             photoreceptors('SCone') = struct('collectingArea', 0.64, 'lambdaMax', 437);
-% 			photoreceptors('MCone') = struct('collectingArea', 0.64, 'lambdaMax', 517);
-%             photoreceptors('Rod')   = struct('collectingArea', 0.50, 'lambdaMax', 501);
-%             obj.addResource('photoreceptors', photoreceptors);
+                'type', PropertyType('char', 'row', {'all_transRA','9cisRAL','hiPSC', 'H9','PEN8E',''}));
             
             obj.addAllowableParentType([]);
         end
